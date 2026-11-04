@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>文件工作区 · 财务工作台</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&amp;family=Noto+Serif+SC:wght@500;600&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="{{appClass}}">
+<sc-if value="{{showLeft}}" hint-placeholder-val="{{true}}">
+<nav class="side" style="flex: 0 0 {{left}}px; width: {{left}}px" aria-label="主导航">
+<div class="brandrow"><button class="iconbtn tt" type="button" aria-label="收起侧栏" onClick="{{hideLeft}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM9.5 4v16"/></svg><span class="tip r">收起侧栏</span></button><span class="brand">财务工作台</span></div>
+<button class="sbox" type="button" onClick="{{openPalette}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM20 20l-4.2-4.2"/></svg><span>搜索或跳转</span><span class="kbd">Ctrl K</span></button>
+<a class="nav" href="Main.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg><span>首页</span></a>
+<a class="nav tt" href="Chat.dc.html"><span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></svg><span class="dot"></span></span><span>AI 对话</span><span class="tip r">Hermes 在本机运行中</span></a>
+<div class="navsub">账务</div>
+<a class="nav" href="Ledger.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7h6M9 11h6"/></svg><span>记账</span></a>
+<a class="nav" href="Reports.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11M10 20V5M16 20v-6M3 20h18"/></svg><span>报表</span></a>
+<a class="nav" href="Invoices.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/></svg><span>发票中心</span><span class="cnt">2</span></a>
+<a class="nav" href="BankRecon.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 12 4l9 5.5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20.5h18"/></svg><span>银行对账</span><span class="cnt">11</span></a>
+<a class="nav" href="Expense.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h15a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12M16 13.5h2"/></svg><span>报销</span><span class="cnt">4</span></a>
+<div class="navsub">资料</div>
+<a class="nav" href="Knowledge.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 7a2 2 0 1 0 0-.01M18 6a2 2 0 1 0 0-.01M12 19a2 2 0 1 0 0-.01M8 7l8-1M7 9l4 8M17 8l-4 9"/></svg><span>知识库</span></a>
+<a class="nav on" href="Workspace.dc.html" aria-current="page"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h4"/></svg><span>文件工作区</span></a>
+<a class="nav" href="Toolbox.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3.5 17.5l3 3 5.8-5.8a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.3-.6-.6-2.3z"/></svg><span>工具箱</span></a>
+<div class="navsub">最近对话</div>
+<a class="recent" href="Chat.dc.html">张三上周的住宿费超标了吗？</a><a class="recent" href="Chat.dc.html">把这批发票做成凭证并对账</a><a class="recent" href="Chat.dc.html">10 月各部门费用环比</a><a class="recent" href="Chat.dc.html">研发费用加计扣除怎么算</a>
+<div class="side-foot">
+<button class="nav" type="button" onClick="{{toggleDark}}"><sc-if value="{{isLight}}" hint-placeholder-val="{{true}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 13.5A8 8 0 1 1 10.5 4a6.5 6.5 0 0 0 9.5 9.5z"/></svg></sc-if><sc-if value="{{isDark}}" hint-placeholder-val="{{false}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2.5v2M12 19.5v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2.5 12h2M19.5 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></sc-if><span>{{darkLabel}}</span></button>
+<a class="nav" href="Settings.dc.html"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>设置</span></a>
+<div class="me"><span class="avatar">会</span><div style="display: flex; flex-direction: column; min-width: 0; line-height: 1.3"><span style="font-size: 13px; font-weight: 500">会计</span><span class="cap">示例数据</span></div></div>
+</div>
+</nav>
+<div class="split tt {{splitLCls}}" role="separator" aria-orientation="vertical" aria-label="调整导航栏宽度" aria-valuenow="{{left}}" tabindex="0" onPointerDown="{{dragL}}" onDoubleClick="{{resetL}}" onKeyDown="{{keyL}}"><span class="grip"></span><span class="tip r">拖动调整宽度，双击还原</span></div>
+</sc-if>
+<div class="main">
+<header class="top">
+<sc-if value="{{leftHidden}}" hint-placeholder-val="{{false}}"><button class="iconbtn tt" type="button" aria-label="展开侧栏" onClick="{{revealLeft}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM9.5 4v16"/></svg><span class="tip">展开侧栏</span></button></sc-if>
+<h1 class="ptitle">文件工作区</h1>
+<div class="dd"><button class="ddbtn {{c_book}}" type="button" aria-label="切换账套" onClick="{{t_book}}">{{cur_book}}<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 9.5 12 15l5.5-5.5"/></svg></button>
+<sc-if value="{{m_book}}" hint-placeholder-val="{{false}}"><div class="menu" role="menu"><div class="mhead">账套</div><sc-for list="{{seg_book}}" as="o" hint-placeholder-count="3"><button class="mi {{o.cls}}" type="button" role="menuitemradio" aria-checked="{{o.pressed}}" onClick="{{o.pick}}"><span>{{o.label}}</span><sc-if value="{{o.on}}" hint-placeholder-val="{{false}}"><span class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></sc-if></button></sc-for><div class="msep"></div><button class="mi" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>新建账套</span></button></div></sc-if></div>
+<div class="dd"><button class="ddbtn {{c_period}}" type="button" aria-label="会计期间" onClick="{{t_period}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM12 7.5V12l3 2"/></svg>{{cur_period}}<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 9.5 12 15l5.5-5.5"/></svg></button>
+<sc-if value="{{m_period}}" hint-placeholder-val="{{false}}"><div class="menu" role="menu" style="min-width: 200px"><div class="mhead">会计期间</div><sc-for list="{{seg_period}}" as="o" hint-placeholder-count="4"><button class="mi {{o.cls}}" type="button" role="menuitemradio" aria-checked="{{o.pressed}}" onClick="{{o.pick}}"><span>{{o.label}}</span><sc-if value="{{o.on}}" hint-placeholder-val="{{false}}"><span class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></sc-if></button></sc-for></div></sc-if></div>
+<div class="dd"><button class="iconbtn tt {{c_bell}}" type="button" aria-label="通知，3 条未读" onClick="{{t_bell}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9M10.3 20.5a1.9 1.9 0 0 0 3.4 0"/></svg><span class="badge">3</span><span class="tip">通知</span></button>
+<sc-if value="{{m_bell}}" hint-placeholder-val="{{false}}"><div class="menu" style="width: 340px; padding: 8px"><div style="display: flex; align-items: center; padding: 4px 8px 8px"><span class="h2" style="margin-right: auto">通知</span><button class="btn ghost sm" type="button">全部已读</button></div>
+<a class="notice" href="Invoices.dc.html"><span class="ndot" style="background: var(--warn)"></span><span style="display: flex; flex-direction: column"><span style="font-size: 13px">2 张发票识别置信度低，需要核对</span><span class="cap">发票中心，5 分钟前</span></span></a>
+<a class="notice" href="Expense.dc.html"><span class="ndot" style="background: var(--bad)"></span><span style="display: flex; flex-direction: column"><span style="font-size: 13px">张三的报销单 BX-1028 住宿超标 360 元</span><span class="cap">报销，飞书提交，32 分钟前</span></span></a>
+<a class="notice" href="Ledger.dc.html"><span class="ndot" style="background: var(--accent)"></span><span style="display: flex; flex-direction: column"><span style="font-size: 13px">Hermes 生成了 3 张凭证草稿，等你确认</span><span class="cap">记账，1 小时前</span></span></a>
+</div></sc-if></div>
+<button class="iconbtn tt {{rCls}}" type="button" aria-label="显示或隐藏右侧面板" onClick="{{toggleRight}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1zM14.5 4v16"/></svg><span class="tip end">Hermes面板</span></button>
+</header>
+<main class="content" style="max-width: none; padding: 0; gap: 0; background: var(--panel)">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 8px 16px; border-bottom: 1px solid var(--line2); background: var(--side)">
+<span class="ftab on"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h4"/></svg>10 月费用分析.docx<button class="iconbtn" type="button" aria-label="关闭标签" style="width: 22px; height: 22px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></span>
+<span class="ftab">10 月部门费用.xlsx<button class="iconbtn" type="button" aria-label="关闭标签" style="width: 22px; height: 22px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></span>
+<span class="ftab">差旅费管理办法 v3.pdf<button class="iconbtn" type="button" aria-label="关闭标签" style="width: 22px; height: 22px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button></span>
+<button class="iconbtn tt" type="button" aria-label="打开文件"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span class="tip">打开文件</span></button>
+<span style="flex-grow: 1"></span>
+<span class="cap tt" tabindex="0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg> 已自动保存<span class="tip end">2 分钟前，本机保存</span></span>
+<button class="iconbtn tt" type="button" aria-label="版本历史"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zM12 7.5V12l3 2"/></svg><span class="tip end">版本历史</span></button>
+<div class="dd"><button class="btn {{c_wexport}}" type="button" aria-haspopup="menu" onClick="{{t_wexport}}">导出<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 9.5 12 15l5.5-5.5"/></svg></button><sc-if value="{{m_wexport}}" hint-placeholder-val="{{false}}"><div class="menu " role="menu" style="min-width: 180px"><button class="mi" type="button" onClick="{{closeMenu}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5v11M7.5 11l4.5 4.5 4.5-4.5M4.5 19.5h15"/></svg><span>Word（.docx）</span></button><button class="mi" type="button" onClick="{{closeMenu}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5v11M7.5 11l4.5 4.5 4.5-4.5M4.5 19.5h15"/></svg><span>PDF</span></button><button class="mi" type="button" onClick="{{closeMenu}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4.5v11M7.5 11l4.5 4.5 4.5-4.5M4.5 19.5h15"/></svg><span>Markdown</span></button></div></sc-if></div>
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 6px 16px; border-bottom: 1px solid var(--line2); background: var(--bg)">
+<div class="dd"><button class="ddbtn {{c_wstyle}}" type="button" aria-haspopup="menu" onClick="{{t_wstyle}}">{{cur_wstyle}}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 9.5 12 15l5.5-5.5"/></svg></button><sc-if value="{{m_wstyle}}" hint-placeholder-val="{{false}}"><div class="menu l" role="menu" style="min-width: 180px"><sc-for list="{{seg_wstyle}}" as="o" hint-placeholder-count="3"><button class="mi {{o.cls}}" type="button" role="menuitemradio" aria-checked="{{o.pressed}}" onClick="{{o.pick}}"><span>{{o.label}}</span><sc-if value="{{o.on}}" hint-placeholder-val="{{false}}"><span class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span></sc-if></button></sc-for></div></sc-if></div>
+<span style="width: 1px; height: 20px; background: var(--line); margin: 0 6px"></span>
+<button class="iconbtn tt" type="button" aria-label="加粗" style="font-weight: 700">B<span class="tip">加粗 Ctrl B</span></button>
+<button class="iconbtn tt" type="button" aria-label="斜体" style="font-style: italic; font-family: var(--serif)">I<span class="tip">斜体 Ctrl I</span></button>
+<button class="iconbtn tt" type="button" aria-label="下划线" style="text-decoration: underline">U<span class="tip">下划线 Ctrl U</span></button>
+<span style="width: 1px; height: 20px; background: var(--line); margin: 0 6px"></span>
+<button class="btn ghost sm" type="button">插入表格</button>
+<button class="btn ghost sm tt" type="button">插入报表数据<span class="tip">从利润表、明细账取数，数字会随账更新</span></button>
+<button class="btn ghost sm" type="button">批注</button>
+</div>
+<div style="padding: 32px 24px 48px">
+<article class="paper">
+<h2 style="font-family: var(--serif); font-size: 24px; font-weight: 500; margin: 0 0 4px">2026 年 10 月费用分析</h2>
+<p>本月期间费用合计 310,240 元，比上月增加 5,680 元。</p>
+<p><span class="selected-text">销售费用 96,200 元，增长 6.4%，主要来自差旅与市场活动，增速略快于收入。</span></p>
+<div class="floatbar" role="toolbar" aria-label="选中内容操作">
+<button class="btn ghost sm" type="button" style="color: var(--accent)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1-5.1-1.9 5.1-1.9z"/></svg>发给 Hermes</button>
+<button class="btn ghost sm" type="button">改写</button>
+<button class="btn ghost sm" type="button">核对数字</button>
+<button class="btn ghost sm" type="button">批注</button>
+</div>
+<p>管理费用 168,900 元，比上月减少 2,300 元，主要是办公费下降。研发费用 42,000 元，与上月基本持平。</p>
+<p class="muted">下一步建议：差旅费按部门拆分，看是否集中在销售部的几次客户拜访。</p>
+</article>
+</div>
+</main>
+</div>
+<sc-if value="{{showRight}}" hint-placeholder-val="{{true}}">
+<div class="split tt {{splitRCls}}" role="separator" aria-orientation="vertical" aria-label="调整右侧面板宽度" aria-valuenow="{{right}}" tabindex="0" onPointerDown="{{dragR}}" onDoubleClick="{{resetR}}" onKeyDown="{{keyR}}"><span class="grip"></span><span class="tip up" style="top: 50%; bottom: auto; left: auto; right: 10px; transform: translate(0,-50%)">拖动调整宽度，双击还原</span></div>
+<aside class="rpanel" style="flex: 0 0 {{right}}px; width: {{right}}px" aria-label="Hermes">
+<div class="rhead"><span class="h2">Hermes</span><span class="tag ai tt" tabindex="0">只读当前文件<span class="tip end">不会读取其他文件，除非你用 @ 引用</span></span><button class="iconbtn tt" type="button" aria-label="关闭面板" onClick="{{closeRight}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg><span class="tip end">关闭面板</span></button></div>
+<div class="rbody">
+<div class="bubble" style="max-width: 92%; font-size: 13.5px"><span class="chip on" style="margin-bottom: 6px">引用：第 2 段</span><br>把这段写得更具体，加上差旅费的数字</div>
+<div style="font-size: 13.5px; line-height: 1.75">可以改成这样：</div>
+<div class="note" style="line-height: 1.75">销售费用 96,200 元，增长 6.4%。其中差旅费 31,800 元，增加 4,100 元；市场活动费 22,600 元，增加 1,700 元，两项合计贡献了全部增量。</div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><button class="btn sm pri" type="button">替换原文</button><button class="btn sm" type="button">插到下方</button><button class="btn sm ghost" type="button">放弃</button></div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center"><span class="cap">数字来自</span><a class="chip" href="Ledger.dc.html">销售费用明细账</a></div>
+<div class="composer" style="margin-top: auto"><input aria-label="向 Hermes 提问" placeholder="就当前文件提问或下指令"><div style="display: flex; align-items: center; gap: 4px"><button class="iconbtn tt" type="button" aria-label="引用文件"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 12a4 4 0 1 1-1.2-2.8M16 8v5a2.5 2.5 0 0 0 5 0v-1a9 9 0 1 0-3.5 7.1"/></svg><span class="tip up">引用其他文件</span></button><span style="flex-grow: 1"></span><button class="iconbtn tt" type="button" aria-label="发送" style="background: var(--btn); color: var(--btn-text)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="tip up end">发送</span></button></div></div>
+</div>
+</aside>
+</sc-if>
+<sc-if value="{{menuOpen}}" hint-placeholder-val="{{false}}"><button class="clickaway" type="button" aria-label="关闭菜单" onClick="{{closeMenu}}"></button></sc-if>
+<sc-if value="{{palette}}" hint-placeholder-val="{{false}}"><div class="scrim"><button class="scrim-btn" type="button" aria-label="关闭搜索" onClick="{{closePalette}}"></button>
+<div class="palette" role="dialog" aria-label="搜索或跳转">
+<label class="pal-in"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM20 20l-4.2-4.2"/></svg><input type="search" aria-label="搜索或跳转" placeholder="搜索凭证、发票、文件，或输入要跳转的页面" value="住宿"></label>
+<div class="pal-list">
+<div class="mhead">跳转</div>
+<a class="mi" href="Invoices.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/></svg><span>发票中心</span><span class="end">待确认 2</span></a>
+<a class="mi" href="Expense.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h15a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12M16 13.5h2"/></svg><span>报销</span><span class="end">待审核 4</span></a>
+<div class="mhead">搜索结果</div>
+<a class="mi on" href="Ledger.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5zM5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3M9 7h6M9 11h6"/></svg><span>记-0015 张三上海出差住宿费</span><span class="end">凭证，2,160.00</span></a>
+<a class="mi" href="Invoices.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/></svg><span>[酒店名称] 数电专票 …1883</span><span class="end">发票，10-31</span></a>
+<a class="mi" href="Knowledge.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h4"/></svg><span>差旅费管理办法 v3 · 4.2 住宿标准</span><span class="end">知识库</span></a>
+<div class="mhead">操作</div>
+<a class="mi" href="Chat.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1-5.1-1.9 5.1-1.9z"/></svg><span>问 Hermes：“住宿”相关问题</span></a>
+<button class="mi" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>新增凭证</span></button>
+</div>
+<div class="pal-foot"><span>上下键选择</span><span>回车打开</span><span>点击空白处关闭</span></div>
+</div></div></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+this.state = { left: 252, right: 380, showLeft: true, showRight: true, dark: false, menu: null, palette: false, drag: '', open: {}, seg: {"book": "[公司名称] 主账套", "period": "2026 年 10 月", "wstyle": "正文"} };
+}
+renderVals() {
+const s = this.state;
+const SEGS = {"book": ["[公司名称] 主账套", "[子公司名称] 账套", "草稿账套（AI 沙箱）"], "period": ["2026 年 10 月", "2026 年 9 月", "2026 年 8 月", "2026 年 7 月"], "wstyle": ["正文", "标题 1", "标题 2", "引用"]};
+const MENUS = ["book", "period", "bell", "wexport", "wstyle"];
+const clamp = (v, a, b) => Math.round(Math.min(b, Math.max(a, v)));
+const setW = (side, w) => side === 'l' ? this.setState({ left: clamp(w, 200, 380) }) : this.setState({ right: clamp(w, 280, 620) });
+const drag = (side) => (e) => {
+if (e.button !== undefined && e.button !== 0) return;
+e.preventDefault();
+const x0 = e.clientX;
+const w0 = side === 'l' ? s.left : s.right;
+const mv = (ev) => { const d = ev.clientX - x0; setW(side, side === 'l' ? w0 + d : w0 - d); };
+const up = () => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); this.setState({ drag: '' }); };
+window.addEventListener('pointermove', mv);
+window.addEventListener('pointerup', up);
+this.setState({ drag: side });
+};
+const key = (side) => (e) => {
+if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+e.preventDefault();
+const d = e.key === 'ArrowLeft' ? -16 : 16;
+if (side === 'l') setW('l', s.left + d); else setW('r', s.right - d);
+};
+const v = {
+appClass: 'app' + (s.dark ? ' dark' : '') + (s.drag ? ' dragging' : ''),
+left: s.left, right: s.right,
+splitLCls: s.drag === 'l' ? 'active' : '', splitRCls: s.drag === 'r' ? 'active' : '',
+showLeft: s.showLeft, leftHidden: !s.showLeft, showRight: s.showRight, rCls: s.showRight ? 'open' : '',
+dragL: drag('l'), dragR: drag('r'), keyL: key('l'), keyR: key('r'),
+resetL: () => this.setState({ left: 252 }), resetR: () => this.setState({ right: 380 }),
+hideLeft: () => this.setState({ showLeft: false }), revealLeft: () => this.setState({ showLeft: true }),
+toggleRight: () => this.setState({ showRight: !s.showRight }), closeRight: () => this.setState({ showRight: false }),
+isDark: s.dark, isLight: !s.dark, darkLabel: s.dark ? '浅色模式' : '深色模式',
+toggleDark: () => this.setState({ dark: !s.dark, seg: Object.assign({}, s.seg, { theme: s.dark ? '浅色' : '深色' }) }),
+palette: s.palette, openPalette: () => this.setState({ palette: true, menu: null }), closePalette: () => this.setState({ palette: false }),
+menuOpen: !!s.menu, closeMenu: () => this.setState({ menu: null })
+};
+MENUS.forEach((k) => {
+v['m_' + k] = s.menu === k;
+v['c_' + k] = s.menu === k ? 'open' : '';
+v['t_' + k] = () => this.setState({ menu: s.menu === k ? null : k });
+});
+Object.keys(s.open).forEach((k) => {
+const on = !!s.open[k];
+v['o_' + k] = on; v['n_' + k] = !on;
+v['sw_' + k] = on ? 'sw on' : 'sw'; v['ap_' + k] = on ? 'true' : 'false';
+v['x_' + k] = () => this.setState({ open: Object.assign({}, s.open, { [k]: !on }) });
+});
+Object.keys(SEGS).forEach((k) => {
+v['cur_' + k] = s.seg[k];
+v['seg_' + k] = SEGS[k].map((l) => ({
+label: l, on: s.seg[k] === l, cls: s.seg[k] === l ? 'on' : '', pressed: s.seg[k] === l ? 'true' : 'false',
+pick: () => { const nx = { seg: Object.assign({}, s.seg, { [k]: l }), menu: null }; if (k === 'theme') nx.dark = l === '深色'; this.setState(nx); }
+}));
+});
+return v;
+}
+}
+</script>
+</body>
+</html>

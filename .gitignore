@@ -1,0 +1,12 @@
+.env
+*.db
+*.db-wal
+*.db-shm
+api-token
+__pycache__/
+*.egg-info/
+.venv/
+node_modules/
+dist/
+apps/desktop/src-tauri/target/
+.pytest_cache/

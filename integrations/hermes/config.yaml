@@ -1,0 +1,26 @@
+# 财务工作台专用的 Hermes 配置片段。
+# 用法：建一个独立 profile（不影响你平时用的 Hermes），把本文件合并进该 profile 的 config.yaml：
+#   hermes profile create finance       # Windows 下路径一般是 %USERPROFILE%\.hermes\profiles\finance\
+# 然后把 .env.example 里的变量填进同目录的 .env，再运行：
+#   hermes -p finance gateway
+# 注：字段名按 hermes-agent 文档（cli-config.yaml.example / features/mcp.md / api-server.md）核对过，
+#     首次在本机跑时请按 docs/tasks/T02 的验收步骤确认。
+
+model:
+  provider: deepseek
+  default: deepseek-chat        # 用你自己的 DeepSeek Key，见 .env
+
+# API Server 平台只给财务工具 + 待办，不给终端、文件、浏览器、网页搜索。
+# 沙箱里开放终端/代码是第二期的事（断网 Docker + 只读副本），第一期先收紧。
+platform_toolsets:
+  api_server: [mcp-finance, todo]
+
+mcp_servers:
+  finance:
+    # 指向工作台自带的 Python 环境；打包后由 Tauri 改写为安装目录里的路径
+    command: "python"
+    args: ["-m", "finance_core.mcp_server"]
+    env:
+      FW_DATA_DIR: "${FW_DATA_DIR}"
+      FW_DEMO: "1"              # 技术验证用演示数据；正式使用前删掉这一行
+    timeout: 60
