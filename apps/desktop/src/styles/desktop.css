@@ -1,0 +1,40 @@
+/* 桌面端在原型样式（app.css）之上的补充：整窗布局、各栏独立滚动、桌面端专用组件。 */
+html, body, #root { height: 100%; }
+body { overflow: hidden; }
+.app { height: 100vh; min-height: 0; flex-wrap: nowrap; overflow: hidden; }
+.side, .rpanel { overflow-y: auto; }
+.main { overflow-y: auto; }
+.top { position: sticky; top: 0; z-index: 10; background: var(--bg); }
+.rbody { flex: 1 1 auto; }
+.app :disabled { cursor: not-allowed; opacity: .45; }
+.btn:disabled:active { transform: none; }
+
+.tbl tbody tr.click { cursor: pointer; }
+.tbl td.wrap { white-space: normal; }
+.ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.alert { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; font-size: 13px; animation: slide .18s ease-out; }
+.alert.bad { background: var(--bad-bg); color: var(--bad); }
+.alert.ok { background: var(--ok-bg); color: var(--ok); }
+.alert .x { margin-left: auto; border: 0; background: transparent; color: inherit; cursor: pointer; padding: 0 2px; font-size: 15px; line-height: 1; }
+
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 56px 16px; color: var(--text2); text-align: center; }
+.empty .t { font-family: var(--serif); font-size: 18px; color: var(--text); }
+
+.skel { height: 14px; border-radius: 6px; background: linear-gradient(90deg, var(--hover), var(--line2), var(--hover)); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+.kv { display: grid; grid-template-columns: 64px 1fr; gap: 6px 10px; font-size: 13px; }
+.kv dt { color: var(--text2); }
+.kv dd { margin: 0; }
+
+.boot { height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 16px; box-sizing: border-box; }
+.boot .card { width: 460px; max-width: 100%; display: flex; flex-direction: column; gap: 14px; }
+.boot code, .code { font-family: var(--mono); font-size: 12.5px; background: var(--side); border: 1px solid var(--line2); border-radius: 8px; padding: 10px 12px; display: block; white-space: pre-wrap; color: var(--text); }
+
+.me.click { cursor: pointer; border-radius: 8px; transition: background .16s; }
+.me.click:hover { background: var(--hover); }
+.menu.upward { top: auto; bottom: calc(100% + 6px); transform-origin: bottom left; }
+
+.pal-in input:focus-visible { outline: none; }
+.pal-in input::-webkit-search-cancel-button { display: none; }

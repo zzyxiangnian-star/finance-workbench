@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "主窗口权限：只开放核心能力，自定义命令 get_backend_config 默认可调用",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

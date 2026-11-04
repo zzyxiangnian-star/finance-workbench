@@ -17,10 +17,22 @@ cd services/core
 python -m venv .venv && .venv\Scripts\activate      # macOS/Linux: source .venv/bin/activate
 pip install -e ".[dev]"
 pytest                                             # 17 项测试
-set FW_DEMO=1 && finance-core                      # 带演示数据启动，监听 127.0.0.1:8765
+$env:FW_DEMO="1"; finance-core                     # PowerShell，带演示数据启动，监听 127.0.0.1:8765
 ```
 
 令牌在数据目录的 `api-token` 文件里（Windows：`%APPDATA%\FinanceWorkbench\api-token`）。
+
+## 运行桌面端（开发）
+
+先按上一节启动本机服务，再开一个终端：
+
+```bash
+cd apps/desktop
+npm install
+npm run tauri dev        # 需要 Rust 和 WebView2（Windows 11 自带）
+```
+
+只想在浏览器里看界面：在 `apps/desktop/.env.local` 写一行 `VITE_FW_TOKEN=<api-token 文件内容>`，再 `npm run dev`，打开 http://localhost:1420 。
 
 ## 接入 Hermes
 
