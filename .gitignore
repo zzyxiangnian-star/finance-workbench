@@ -13,3 +13,6 @@ apps/desktop/src-tauri/target/
 .env.local
 apps/desktop/src-tauri/gen/
 *.tsbuildinfo
+
+# impeccable skill 的本地引擎二进制（首次运行时自动下载，不入库）
+.claude/skills/impeccable/scripts/bin/
