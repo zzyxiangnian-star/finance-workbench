@@ -95,10 +95,10 @@ body { overflow: hidden; }
 .md .tbl { width: 100%; }
 .md td.num, .md th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .chip.vno { margin: 0 2px; vertical-align: middle; }
-.composer { border-top: 1px solid var(--line2); padding: 12px 0; background: var(--bg); }
-.composerow { display: flex; gap: 8px; align-items: flex-end; padding-top: 0; padding-bottom: 0; }
-.composer textarea { flex: 1; resize: none; min-height: 40px; max-height: 176px; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font: inherit; font-size: 14px; line-height: 22px; background: var(--field); color: var(--text); box-sizing: border-box; }
-.composer textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.composer { width: min(760px, calc(100% - 40px)); margin: 0 auto 16px; box-sizing: border-box; flex-direction: row; align-items: flex-end; }
+.composerow { display: flex; gap: 8px; align-items: flex-end; flex: 1; width: auto; margin: 0; padding: 0; }
+.composer textarea { flex: 1; resize: none; min-height: 36px; max-height: 176px; line-height: 22px; padding: 6px 0; }
+.composer textarea:focus, .composer textarea:focus-visible { outline: none; box-shadow: none; border: 0; }
 .hermesdot { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; }
 .hdot { width: 8px; height: 8px; border-radius: 50%; display: block; background: var(--text2); }
 .hdot.on { background: var(--ok); }
