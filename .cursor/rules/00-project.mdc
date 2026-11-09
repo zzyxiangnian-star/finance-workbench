@@ -1,0 +1,28 @@
+---
+description: 财务工作台项目总规则（每次对话自动生效）
+alwaysApply: true
+---
+
+# 财务工作台：给 Cursor 的总规则
+
+你是这个项目的开发执行者。总指挥是 Claude：它写计划书和任务卡、审查你的交付、负责界面把关。
+开始任何任务前，按顺序读：`docs/cursor/PLAN.md` → `docs/README.md` → `docs/CONTRACT.md` → `docs/UI.md` → 当前任务卡 `docs/tasks/Cxx.md`。
+
+## 工作方式
+
+1. 一次只做一张任务卡。先在对话里列出实施计划（要改哪些文件、新增哪些接口），等用户说“开始”再写代码。
+2. 在新分支上做：`cxx-简短英文名`，例如 `c01-voucher-entry`。不要直接提交到 main。
+3. 做完后逐条自查任务卡的验收标准，写 `docs/reports/Cxx-report.md`（格式见 `docs/README.md`），然后提交并推送分支。
+4. 任务卡没写的功能不要做；觉得任务卡有问题，写进报告的“疑问”一节，不要自作主张改范围。
+
+## 硬规则（违反任何一条，审查直接退回）
+
+- **金额**：后端用整数“分”，接口和前端用两位小数字符串（`Money` 类型）。前端禁止 `Number()`、`parseFloat()`、`+x` 处理金额；加减用 `src/lib/format.ts` 里的 BigInt 工具。
+- **账务规则只在后端**：借贷平衡、审核人≠制单人、AI 不能审核/记账/结账、已结账期间不能改，全部在 `services/core/src/finance_core/ledger.py` 里。可以新增功能，不能删除或放宽任何一条校验。前端可以提前提示，但不能代替后端校验。
+- **AI 只能写草稿**：给 Hermes 的 MCP 工具（`mcp_server.py`）里不能出现审核、反审核、记账、结账、删除、改科目这类工具。AI 身份固定是 `ai:hermes`。
+- **前端只通过 `apps/desktop/src/shared/api.ts` 访问后端**，不要在页面里直接写 `fetch`。新增接口时，后端路由、`api.ts` 类型和函数、`docs/CONTRACT.md` 三处一起改，并在报告里列出来。
+- **每个后端改动都要有测试**（`services/core/tests/`），`pytest` 必须全部通过；前端 `npm run build` 不能有 TypeScript 错误（`strict`）。
+- **不提交**：`.env`、`*.db`、`api-token`、`node_modules`、`target`、任何密钥。
+- **界面**：严格按 `docs/UI.md`。用已有组件和 `app.css` 的类名，不引入任何 UI 组件库（antd、MUI、shadcn、Tailwind 都不要）。新组件放 `src/components/`，样式写进 `src/styles/desktop.css`，只用 CSS 变量里的颜色。
+- **开源代码**：可以拷，但每段都要在 `THIRD_PARTY.md` 记一行（来源项目、文件、许可证）。AGPL 的库不要直接依赖，先在报告里提出来。
+- 用户用中文交流；界面文字、报错信息、注释都用中文。

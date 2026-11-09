@@ -1,0 +1,15 @@
+---
+description: 前端（apps/desktop）开发规则
+globs: apps/desktop/**
+alwaysApply: false
+---
+
+# 前端规则
+
+- React 18 + TypeScript strict + Vite + Tauri 2，路由用 `react-router-dom` 的 HashRouter。
+- 页面放 `src/pages/`，在 `src/App.tsx` 注册路由，在 `src/lib/routes.ts` 登记标题和图标。
+- 取当前用户和接口：`const { api, user } = useApp()`。
+- 右侧栏内容用 `<RightPane>`，顶栏按钮用 `<TopActions>`，下拉用 `<Dropdown>`，悬浮提示用 `.tt` + `<Tip>`，图标用 `<Icon name=…>`（缺图标就在 `Icon.tsx` 里加，24×24、1.6 线宽描边）。
+- 每个数据区都要有：加载中（`.skel`）、空状态（`.empty`）、出错（`<Alert kind="bad">`，显示 `ApiError.message`）三种样子。不要用 `alert()`/`confirm()`，确认操作用页面内的确认条或弹层。
+- 键盘：表格行可 Tab 聚焦、Enter 打开；弹层 Esc 关闭。
+- 本地运行：先启动后端（`FW_DEMO=1 finance-core`），再 `npm run tauri dev`；只看界面可用 `npm run dev` + `.env.local` 里的 `VITE_FW_TOKEN`。

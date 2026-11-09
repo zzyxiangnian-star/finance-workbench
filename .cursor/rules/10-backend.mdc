@@ -1,0 +1,15 @@
+---
+description: 后端（services/core）开发规则
+globs: services/core/**
+alwaysApply: false
+---
+
+# 后端规则
+
+- Python 3.11+，FastAPI，SQLite（WAL）。不用 ORM，SQL 手写，参数化查询，禁止字符串拼接用户输入。
+- 表结构变更：在 `db.py` 里加迁移（`SCHEMA_VERSION` +1，按版本执行 `ALTER`/新表），不能删表重建，已有数据必须保留。
+- 业务错误一律抛 `LedgerError(code, message)`：`code` 是稳定的英文蛇形名，`message` 是给用户看的中文句子。HTTP 层统一转成 422。
+- 写操作都要调用 `_log` 记操作日志。多步写操作放在 `with self._tx():` 里。
+- 金额进来先过 `money.to_cents`，出去用 `money.to_yuan`。
+- 新接口要带 `dependencies=deps`（令牌校验），写操作要 `actor: str = Depends(user)`。
+- 运行测试：`cd services/core && pytest`。
