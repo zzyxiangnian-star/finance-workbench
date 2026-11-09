@@ -18,6 +18,7 @@ export interface Account {
   parent_code: string | null;
   enabled: boolean;
   is_leaf: boolean;
+  py: string; // 名称拼音首字母，如 glfy-bgf
 }
 
 export interface VoucherLine {
@@ -95,6 +96,18 @@ export interface TrialBalance {
   balanced: boolean;
 }
 
+export interface AccountBalance {
+  account_code: string;
+  account_name: string;
+  direction: "debit" | "credit";
+  period: Period;
+  include_unposted: boolean;
+  opening: Money;
+  debit: Money;
+  credit: Money;
+  closing: Money;
+}
+
 export interface PeriodInfo {
   period: Period;
   status: "open" | "closed";
@@ -155,11 +168,18 @@ export function createClient(cfg: ClientConfig) {
     health: () => req<{ ok: boolean; version: string }>("GET", "/api/health"),
     accounts: (includeDisabled = false) =>
       req<Account[]>("GET", "/api/accounts", undefined, { include_disabled: includeDisabled }),
+    accountBalance: (code: string, period: Period, includeUnposted = false) =>
+      req<AccountBalance>("GET", `/api/accounts/${encodeURIComponent(code)}/balance`, undefined, {
+        period, include_unposted: includeUnposted,
+      }),
+    summaries: (q = "", limit = 10) => req<string[]>("GET", "/api/summaries", undefined, { q, limit }),
     periods: () => req<PeriodInfo[]>("GET", "/api/periods"),
     closePeriod: (p: Period) => req<{ ok: true }>("POST", `/api/periods/${p}/close`),
     vouchers: (q: VoucherQuery = {}) => req<{ total: number; items: Voucher[] }>("GET", "/api/vouchers", undefined, q),
     voucher: (id: number) => req<Voucher>("GET", `/api/vouchers/${id}`),
     createVoucher: (v: VoucherInput) => req<Voucher>("POST", "/api/vouchers", v),
+    nextVoucherNumber: (period: Period, word = "记") =>
+      req<{ display_no: string }>("GET", "/api/vouchers/next-number", undefined, { period, word }),
     updateVoucher: (id: number, v: VoucherInput) => req<Voucher>("PUT", `/api/vouchers/${id}`, v),
     deleteVoucher: (id: number) => req<{ ok: true }>("DELETE", `/api/vouchers/${id}`),
     review: (id: number) => req<Voucher>("POST", `/api/vouchers/${id}/review`),

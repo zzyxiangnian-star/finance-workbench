@@ -432,6 +432,34 @@ class Ledger:
             "closing": to_yuan(sumf("closing")),
         }
 
+    def next_display_no(self, period: str, word: str = "记") -> str:
+        """预览下一个凭证号。保存时 create_voucher 仍会重新分配，这里不占号。"""
+        if len(period) != 7 or period[4] != "-" or not (period[:4].isdigit() and period[5:].isdigit()):
+            raise LedgerError("bad_period", f"期间格式不对：{period}，应为 YYYY-MM")
+        word = (word or "记").strip() or "记"
+        n = self.conn.execute(
+            "SELECT COALESCE(MAX(number), 0) + 1 FROM vouchers WHERE period = ? AND word = ?",
+            (period, word),
+        ).fetchone()[0]
+        return f"{word}-{int(n):04d}"
+
+    def recent_summaries(self, q: str = "", limit: int = 10) -> list[str]:
+        """最近用过的摘要，去重后按最近使用时间倒序。同一秒内用凭证 id 打破平局。"""
+        q = (q or "").strip()
+        limit = min(max(int(limit), 1), 50)
+        escaped = q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        rows = self.conn.execute(
+            """SELECT l.summary
+               FROM voucher_lines l
+               JOIN vouchers v ON v.id = l.voucher_id
+               WHERE (? = '' OR l.summary LIKE '%' || ? || '%' ESCAPE '\\')
+               GROUP BY l.summary
+               ORDER BY MAX(v.updated_at) DESC, MAX(v.id) DESC, l.summary
+               LIMIT ?""",
+            (q, escaped, limit),
+        ).fetchall()
+        return [r["summary"] for r in rows]
+
     def audit_log(self, target: str | None = None, limit: int = 100) -> list[dict]:
         if target:
             q = self.conn.execute("SELECT * FROM audit_log WHERE target=? ORDER BY id DESC LIMIT ?", (target, limit))
