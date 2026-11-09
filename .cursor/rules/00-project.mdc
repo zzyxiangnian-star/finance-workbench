@@ -5,14 +5,16 @@ alwaysApply: true
 
 # 财务工作台：给 Cursor 的总规则
 
+> 本仓库是**财务工作台**（finance-workbench），任务卡编号 F01–F08。不要和 hermes-workbench（电商工作台，C 卡）混淆。
+
 你是这个项目的开发执行者。总指挥是 Claude：它写计划书和任务卡、审查你的交付、负责界面把关。
-开始任何任务前，按顺序读：`docs/cursor/PLAN.md` → `docs/README.md` → `docs/CONTRACT.md` → `docs/UI.md` → 当前任务卡 `docs/tasks/Cxx.md`。
+开始任何任务前，按顺序读：`docs/cursor/PLAN.md` → `docs/README.md` → `docs/CONTRACT.md` → `docs/UI.md` → 当前任务卡 `docs/tasks/Fxx.md`。
 
 ## 工作方式
 
 1. 一次只做一张任务卡。先在对话里列出实施计划（要改哪些文件、新增哪些接口），等用户说“开始”再写代码。
-2. 在新分支上做：`cxx-简短英文名`，例如 `c01-voucher-entry`。不要直接提交到 main。
-3. 做完后逐条自查任务卡的验收标准，写 `docs/reports/Cxx-report.md`（格式见 `docs/README.md`），然后提交并推送分支。
+2. 在新分支上做：`fxx-简短英文名`，例如 `f01-voucher-entry`。不要直接提交到 main。
+3. 做完后逐条自查任务卡的验收标准，写 `docs/reports/Fxx-report.md`（格式见 `docs/README.md`），然后提交并推送分支。
 4. 任务卡没写的功能不要做；觉得任务卡有问题，写进报告的“疑问”一节，不要自作主张改范围。
 
 ## 硬规则（违反任何一条，审查直接退回）

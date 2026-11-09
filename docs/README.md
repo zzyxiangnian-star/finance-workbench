@@ -26,17 +26,17 @@ Cursor 可以改前后端代码，但以下内容只能新增、不能削弱，�
 
 ## 交付流程
 
-1. 用户让 Cursor 做 `docs/tasks/Cxx.md`。Cursor 先列计划，用户确认后开工。
-2. Cursor 在分支 `cxx-…` 提交，写 `docs/reports/Cxx-report.md`：
+1. 用户让 Cursor 做 `docs/tasks/Fxx.md`。Cursor 先列计划，用户确认后开工。
+2. Cursor 在分支 `fxx-…` 提交，写 `docs/reports/Fxx-report.md`：
    - 完成情况：逐条对照验收标准，写 通过 / 未完成 / 未验证 及原因
    - 改动文件：完整列表
    - 契约和规则改动：新增了哪些接口、表、校验
    - 本机怎么验证：命令和点击步骤
    - 第三方代码：拷了什么、许可证
    - 疑问和遗留问题
-   - 截图：`docs/reports/img/Cxx-*.png`
-3. 推送分支后，用户告诉 Claude“Cxx 做完了”。
-4. Claude 审查，写 `docs/reviews/Cxx-review.md`：通过就合并并给下一张卡；需返工就给一段可直接发给 Cursor 的返工指令。
+   - 截图：`docs/reports/img/Fxx-*.png`
+3. 推送分支后，用户告诉 Claude“Fxx 做完了”。
+4. Claude 审查，写 `docs/reviews/Fxx-review.md`：通过就合并并给下一张卡；需返工就给一段可直接发给 Cursor 的返工指令。
 
 ## 硬规则
 
