@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { usePersistent } from "../lib/persist";
 import { routeOf } from "../lib/routes";
@@ -27,6 +27,24 @@ export function Shell() {
   const title = routeOf(loc.pathname)?.title ?? "财务工作台";
 
   const setHasRight = useCallback((v: boolean) => setHasRightState(v), []);
+  // 记在外壳上。开发模式会把录入页挂载两次，用计数避免第二次恢复把开关又打开。
+  const openRef = useRef(rightOpen);
+  openRef.current = rightOpen;
+  const heldRight = useRef<boolean | null>(null);
+  const holdCount = useRef(0);
+  const holdRightOpen = useCallback(() => {
+    if (holdCount.current === 0) heldRight.current = openRef.current;
+    holdCount.current += 1;
+    setRightOpen(true);
+  }, []);
+  const releaseRightOpen = useCallback(() => {
+    if (holdCount.current === 0) return;
+    holdCount.current -= 1;
+    if (holdCount.current > 0) return;
+    const prev = heldRight.current;
+    heldRight.current = null;
+    if (prev !== null) setRightOpen(prev);
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -46,7 +64,7 @@ export function Shell() {
   const showRight = hasRight && rightOpen;
 
   return (
-    <PaneContext.Provider value={{ rightEl, topEl, rightOpen, setRightOpen, setHasRight }}>
+    <PaneContext.Provider value={{ rightEl, topEl, rightOpen, setRightOpen, holdRightOpen, releaseRightOpen, setHasRight }}>
       <div className={"app" + (dark ? " dark" : "") + (dragging ? " dragging" : "")}>
         {showLeft && (
           <>

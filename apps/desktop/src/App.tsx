@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { createHashRouter, RouterProvider } from "react-router-dom";
 import { Shell } from "./components/Shell";
 import { getBackendConfig, ping, type BackendConfig } from "./lib/backend";
 import { Ctx } from "./lib/context";
@@ -8,6 +8,7 @@ import { ROUTES } from "./lib/routes";
 import { ChatPage } from "./pages/ChatPage";
 import { LedgerPage } from "./pages/LedgerPage";
 import { Placeholder } from "./pages/Placeholder";
+import { VoucherEntryPage } from "./pages/VoucherEntryPage";
 import { createClient } from "./shared/api";
 
 type Boot = { state: "loading" } | { state: "down"; reason: string } | { state: "ready"; cfg: BackendConfig };
@@ -25,6 +26,21 @@ function ServiceDown({ reason, onRetry, retrying }: { reason: string; onRetry: (
     </div>
   );
 }
+
+const router = createHashRouter([
+  {
+    element: <Shell />,
+    children: [
+      { path: "/ledger/new", element: <VoucherEntryPage /> },
+      { path: "/ledger/:id/edit", element: <VoucherEntryPage /> },
+      { path: "/ledger", element: <LedgerPage /> },
+      { path: "/chat/:id", element: <ChatPage /> },
+      { path: "/chat", element: <ChatPage /> },
+      ...ROUTES.filter((r) => r.path !== "/ledger" && r.path !== "/chat").map((r) => ({ path: r.path, element: <Placeholder /> })),
+      { path: "*", element: <Placeholder /> },
+    ],
+  },
+]);
 
 export default function App() {
   const [boot, setBoot] = useState<Boot>({ state: "loading" });
@@ -58,17 +74,7 @@ export default function App() {
 
   return (
     <Ctx.Provider value={{ api, user, setUser }}>
-      <HashRouter>
-        <Routes>
-          <Route element={<Shell />}>
-            <Route path="/ledger" element={<LedgerPage />} />
-            <Route path="/chat" element={<ChatPage />} />
-            <Route path="/chat/:id" element={<ChatPage />} />
-            {ROUTES.filter((r) => r.path !== "/ledger" && r.path !== "/chat").map((r) => <Route key={r.path} path={r.path} element={<Placeholder />} />)}
-            <Route path="*" element={<Placeholder />} />
-          </Route>
-        </Routes>
-      </HashRouter>
+      <RouterProvider router={router} />
     </Ctx.Provider>
   );
 }

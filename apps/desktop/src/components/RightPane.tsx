@@ -7,6 +7,10 @@ export interface PaneCtx {
   topEl: HTMLElement | null;
   rightOpen: boolean;
   setRightOpen: (v: boolean) => void;
+  /** 进入某页时强制打开，并记住进来之前的开关。 */
+  holdRightOpen: () => void;
+  /** 离开该页时恢复进来之前的开关。 */
+  releaseRightOpen: () => void;
   setHasRight: (v: boolean) => void;
 }
 
@@ -19,8 +23,8 @@ function usePane() {
 }
 
 export function useRightPane() {
-  const { rightOpen, setRightOpen } = usePane();
-  return { open: rightOpen, setOpen: setRightOpen };
+  const { rightOpen, setRightOpen, holdRightOpen, releaseRightOpen } = usePane();
+  return { open: rightOpen, setOpen: setRightOpen, hold: holdRightOpen, release: releaseRightOpen };
 }
 
 export function RightPane({ children }: { children: ReactNode }) {

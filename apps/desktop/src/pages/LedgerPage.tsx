@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Dropdown } from "../components/Dropdown";
 import { Icon } from "../components/Icon";
 import { RightPane, TopActions, useRightPane } from "../components/RightPane";
@@ -17,6 +17,7 @@ const TABS = ["凭证", "账簿", "科目与辅助核算", "期末结账"] as co
 
 export function LedgerPage() {
   const { api } = useApp();
+  const nav = useNavigate();
   const [params, setParams] = useSearchParams();
   const rp = useRightPane();
   const [tab, setTab] = useState<(typeof TABS)[number]>("凭证");
@@ -118,10 +119,9 @@ export function LedgerPage() {
                   style={{ border: 0, outline: "none", background: "transparent", font: "inherit", color: "var(--text)", minWidth: 0, flex: 1 }} />
               </label>
               <span style={{ flexGrow: 1 }} />
-              <span className="tt" style={{ display: "inline-flex" }}>
-                <button className="btn pri" type="button" disabled><Icon name="plus" size={16} />新增凭证</button>
-                <Tip pos="end">凭证录入在下一步上线</Tip>
-              </span>
+              <button className="btn pri" type="button" onClick={() => nav("/ledger/new")}>
+                <Icon name="plus" size={16} />新增凭证
+              </button>
             </div>
 
             {err && <Alert kind="bad" onClose={() => setErr(null)}>{err}</Alert>}
@@ -176,7 +176,7 @@ export function LedgerPage() {
 
       <RightPane>
         {selected ? (
-          <VoucherDetail key={selected.id} v={selected} onChanged={onChanged} onClose={close} />
+          <VoucherDetail key={selected.id} v={selected} onChanged={onChanged} onClose={close} onDeleted={() => { close(); void load(); }} />
         ) : (
           <div className="empty" style={{ flex: 1 }}>
             <span className="t">凭证详情</span>

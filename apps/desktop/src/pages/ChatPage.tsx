@@ -313,7 +313,7 @@ export function ChatPage() {
           </div>
         )}
       </div>
-      {confirmDelete && <ConfirmBar text="删除这个对话？消息会一起去掉。" onCancel={() => setConfirmDelete(false)} onOk={() => { void remove(); }} />}
+      {confirmDelete && <ConfirmBar text="删除这个对话？消息会一起去掉。" confirmLabel="删除" danger onCancel={() => setConfirmDelete(false)} onConfirm={() => { void remove(); }} />}
       {error && <div className="chatpad"><Alert kind="bad" onClose={() => setError("")}>{error}</Alert></div>}
       <div className="chatscroll" ref={scroller}>
         <div className="chatcol">
@@ -390,6 +390,7 @@ export function ChatPage() {
               v={pane.v}
               onChanged={(v) => setPane({ kind: "one", v })}
               onClose={() => { setPane(null); setOpen(false); }}
+              onDeleted={() => { setPane(null); setOpen(false); }}
             />
           ) : (
             <div className="pad">

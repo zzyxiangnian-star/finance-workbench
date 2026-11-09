@@ -26,6 +26,7 @@ from .chat_store import (
 from .config import Settings
 from .db import connect
 from .ledger import AI_PREFIX, Ledger, LedgerError, LineInput, VoucherInput
+from .pinyin import initials
 from .seed import seed_accounts, seed_demo
 
 
@@ -162,7 +163,15 @@ def create_app(settings: Settings | None = None, demo: bool | None = None) -> Fa
 
     @app.get("/api/accounts", dependencies=deps)
     def accounts(request: Request, include_disabled: bool = False):
-        return L(request).list_accounts(include_disabled)
+        return [row | {"py": initials(row["name"])} for row in L(request).list_accounts(include_disabled)]
+
+    @app.get("/api/accounts/{code}/balance", dependencies=deps)
+    def account_balance(code: str, period: str, request: Request, include_unposted: bool = False):
+        return L(request).account_balance(code, period, include_unposted)
+
+    @app.get("/api/summaries", dependencies=deps)
+    def summaries(request: Request, q: str = "", limit: int = 10):
+        return L(request).recent_summaries(q, limit)
 
     @app.get("/api/periods", dependencies=deps)
     def periods(request: Request):
@@ -190,6 +199,10 @@ def create_app(settings: Settings | None = None, demo: bool | None = None) -> Fa
     @app.get("/api/vouchers/lookup", dependencies=deps)
     def lookup(request: Request, no: str, period: str | None = None):
         return L(request).lookup_vouchers(no, period)
+
+    @app.get("/api/vouchers/next-number", dependencies=deps)
+    def next_number(period: str, request: Request, word: str = "记"):
+        return {"display_no": L(request).next_display_no(period, word)}
 
     @app.get("/api/vouchers/{vid}", dependencies=deps)
     def get(vid: int, request: Request):

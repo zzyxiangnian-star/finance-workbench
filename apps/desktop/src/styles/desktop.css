@@ -39,6 +39,43 @@ body { overflow: hidden; }
 .pal-in input:focus-visible { outline: none; }
 .pal-in input::-webkit-search-cancel-button { display: none; }
 
+.entry-head { display: flex; flex-wrap: wrap; gap: 10px; }
+.entry-head .field { flex: 1 1 140px; }
+.entry-head .field.grow { flex: 2 1 220px; }
+.entry-box { overflow: visible; }
+.tbl.entry td { position: relative; padding: 4px 6px; vertical-align: middle; }
+.tbl.entry tr:focus-within { z-index: 2; }
+.tbl.entry tfoot td { font-weight: 600; border-bottom: 0; white-space: normal; }
+.cellinput {
+  width: 100%; height: 32px; border: 1px solid transparent; border-radius: 8px; padding: 0 8px;
+  font: inherit; font-size: 13px; background: transparent; color: var(--text); box-sizing: border-box;
+}
+.tbl.entry .num .cellinput { text-align: right; font-variant-numeric: tabular-nums; }
+.cellinput:focus { outline: none; border-color: var(--accent); background: var(--field); box-shadow: 0 0 0 3px var(--accent-soft); }
+.picker { position: relative; }
+.picker-menu { width: max(100%, 280px); max-height: 240px; overflow: auto; }
+.picker .mi.hi { background: var(--hover); }
+.tbl.entry .rowdel { opacity: 0; }
+.tbl.entry tr:hover .rowdel,
+.tbl.entry tr:focus-within .rowdel { opacity: 1; }
+.entry-total { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.entry-upper { font-weight: 500; }
+.entry-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.confirmbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 10px 12px; border-radius: 10px;
+  background: var(--warn-bg); color: var(--text); font-size: 13px; animation: slide .18s ease-out;
+}
+.confirmbar .spacer { flex: 1; }
+
+/* 录入表列宽（Claude 审查 F01 时调整）：科目列放宽，避免“管理费用-差旅费”被截断 */
+.tbl.entry { table-layout: fixed; }
+.tbl.entry th:nth-child(1) { width: 26%; }
+.tbl.entry th:nth-child(2) { width: 36%; }
+.tbl.entry th:nth-child(3), .tbl.entry th:nth-child(4) { width: 16%; }
+.tbl.entry th:nth-child(5) { width: 40px; }
+.tbl.entry .cellinput { text-overflow: ellipsis; }
+
+/* F02 对话页 */
 .main:has(.chatpage) { overflow: hidden; }
 .chatpage { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .chathead { display: flex; align-items: center; gap: 8px; padding: 12px 20px 0; }
@@ -55,7 +92,6 @@ body { overflow: hidden; }
 .toolchip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text2); }
 .bubbleacts { display: none; gap: 6px; margin-top: 6px; }
 .bubble.assistant:hover .bubbleacts { display: flex; }
-.btn.sm { height: 28px; padding: 0 10px; font-size: 12px; }
 .md .tbl { width: 100%; }
 .md td.num, .md th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .chip.vno { margin: 0 2px; vertical-align: middle; }
@@ -68,5 +104,3 @@ body { overflow: hidden; }
 .hdot.on { background: var(--ok); }
 .hdot.bad { background: var(--bad); }
 .recent .nav { padding-left: 36px; }
-.confirmbar { display: flex; align-items: center; gap: 8px; margin: 8px 20px 0; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--side); font-size: 13px; }
-.confirmbar span { margin-right: auto; }
