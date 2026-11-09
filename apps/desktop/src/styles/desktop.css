@@ -74,3 +74,33 @@ body { overflow: hidden; }
 .tbl.entry th:nth-child(3), .tbl.entry th:nth-child(4) { width: 16%; }
 .tbl.entry th:nth-child(5) { width: 40px; }
 .tbl.entry .cellinput { text-overflow: ellipsis; }
+
+/* F02 对话页 */
+.main:has(.chatpage) { overflow: hidden; }
+.chatpage { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.chathead { display: flex; align-items: center; gap: 8px; padding: 12px 20px 0; }
+.chathead h2, .chattitle { margin: 0; font-size: 16px; font-weight: 600; }
+.chathead .input.chattitle { max-width: 320px; }
+.chatscroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.chatcol { width: min(760px, 100%); margin: 0 auto; padding: 8px 20px 24px; box-sizing: border-box; }
+.chatpad { width: min(760px, 100%); margin: 8px auto 0; padding: 0 20px; box-sizing: border-box; }
+.sugs { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+.bubble { position: relative; margin: 14px 0; }
+.bubble.user { margin-left: auto; max-width: 80%; width: fit-content; background: var(--hover); border-radius: 12px; padding: 8px 12px; }
+.bubble.assistant { align-self: stretch; max-width: none; background: transparent; border-radius: 0; padding: 0; }
+.tools { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.toolchip { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text2); }
+.bubbleacts { display: none; gap: 6px; margin-top: 6px; }
+.bubble.assistant:hover .bubbleacts { display: flex; }
+.md .tbl { width: 100%; }
+.md td.num, .md th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.chip.vno { margin: 0 2px; vertical-align: middle; }
+.composer { width: min(760px, calc(100% - 40px)); margin: 0 auto 16px; box-sizing: border-box; flex-direction: row; align-items: flex-end; }
+.composerow { display: flex; gap: 8px; align-items: flex-end; flex: 1; width: auto; margin: 0; padding: 0; }
+.composer textarea { flex: 1; resize: none; min-height: 36px; max-height: 176px; line-height: 22px; padding: 6px 0; }
+.composer textarea:focus, .composer textarea:focus-visible { outline: none; box-shadow: none; border: 0; }
+.hermesdot { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; }
+.hdot { width: 8px; height: 8px; border-radius: 50%; display: block; background: var(--text2); }
+.hdot.on { background: var(--ok); }
+.hdot.bad { background: var(--bad); }
+.recent .nav { padding-left: 36px; }

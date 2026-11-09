@@ -25,6 +25,7 @@ export const ROUTES: RouteDef[] = [
 
 /** 侧栏只列 ROUTES。录入页不进导航，但顶栏要有标题。 */
 export function routeOf(path: string): RouteDef | undefined {
+  if (path.startsWith("/chat/")) return ROUTES.find((r) => r.path === "/chat");
   if (path === "/ledger/new") return { path, title: "新增凭证", icon: "ledger", keywords: "xinzeng pingzheng" };
   if (/^\/ledger\/\d+\/edit$/.test(path)) return { path, title: "编辑凭证", icon: "ledger", keywords: "bianji pingzheng" };
   return ROUTES.find((r) => r.path === path);

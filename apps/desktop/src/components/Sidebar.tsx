@@ -1,11 +1,37 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useApp } from "../lib/context";
 import { ROUTES, type RouteDef } from "../lib/routes";
+import type { ChatSession } from "../shared/api";
 import { Icon } from "./Icon";
 import { Tip } from "./Tip";
 
 const PRESET_USERS = ["李会计", "王主管", "赵出纳"];
+
+function RecentChats() {
+  const { api } = useApp();
+  const [rows, setRows] = useState<ChatSession[]>([]);
+  useEffect(() => {
+    let stop = false;
+    const load = () => {
+      api.chats().then((list) => { if (!stop) setRows(list.slice(0, 6)); }).catch(() => { if (!stop) setRows([]); });
+    };
+    load();
+    window.addEventListener("fw-chats-changed", load);
+    return () => { stop = true; window.removeEventListener("fw-chats-changed", load); };
+  }, [api]);
+  if (rows.length === 0) return null;
+  return (
+    <div className="recent">
+      <div className="navsub">最近对话</div>
+      {rows.map((s) => (
+        <NavLink key={s.id} to={"/chat/" + s.id} className={({ isActive }) => "nav recentlink" + (isActive ? " on" : "")}>
+          <span className="ellipsis">{s.title}</span>
+        </NavLink>
+      ))}
+    </div>
+  );
+}
 
 function NavItem({ r }: { r: RouteDef }) {
   return (
@@ -59,7 +85,12 @@ export function Sidebar(props: {
         <span>搜索或跳转</span>
         <span className="kbd">Ctrl K</span>
       </button>
-      {top.map((r) => <NavItem key={r.path} r={r} />)}
+      {top.map((r) => (
+        <Fragment key={r.path}>
+          <NavItem r={r} />
+          {r.path === "/chat" && <RecentChats />}
+        </Fragment>
+      ))}
       <div className="navsub">账务</div>
       {ROUTES.filter((r) => r.group === "账务").map((r) => <NavItem key={r.path} r={r} />)}
       <div className="navsub">资料</div>

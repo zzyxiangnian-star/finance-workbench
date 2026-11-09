@@ -5,6 +5,7 @@ import { getBackendConfig, ping, type BackendConfig } from "./lib/backend";
 import { Ctx } from "./lib/context";
 import { usePersistent } from "./lib/persist";
 import { ROUTES } from "./lib/routes";
+import { ChatPage } from "./pages/ChatPage";
 import { LedgerPage } from "./pages/LedgerPage";
 import { Placeholder } from "./pages/Placeholder";
 import { VoucherEntryPage } from "./pages/VoucherEntryPage";
@@ -33,7 +34,9 @@ const router = createHashRouter([
       { path: "/ledger/new", element: <VoucherEntryPage /> },
       { path: "/ledger/:id/edit", element: <VoucherEntryPage /> },
       { path: "/ledger", element: <LedgerPage /> },
-      ...ROUTES.filter((r) => r.path !== "/ledger").map((r) => ({ path: r.path, element: <Placeholder /> })),
+      { path: "/chat/:id", element: <ChatPage /> },
+      { path: "/chat", element: <ChatPage /> },
+      ...ROUTES.filter((r) => r.path !== "/ledger" && r.path !== "/chat").map((r) => ({ path: r.path, element: <Placeholder /> })),
       { path: "*", element: <Placeholder /> },
     ],
   },
