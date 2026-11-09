@@ -66,3 +66,11 @@ body { overflow: hidden; }
   background: var(--warn-bg); color: var(--text); font-size: 13px; animation: slide .18s ease-out;
 }
 .confirmbar .spacer { flex: 1; }
+
+/* 录入表列宽（Claude 审查 F01 时调整）：科目列放宽，避免“管理费用-差旅费”被截断 */
+.tbl.entry { table-layout: fixed; }
+.tbl.entry th:nth-child(1) { width: 26%; }
+.tbl.entry th:nth-child(2) { width: 36%; }
+.tbl.entry th:nth-child(3), .tbl.entry th:nth-child(4) { width: 16%; }
+.tbl.entry th:nth-child(5) { width: 40px; }
+.tbl.entry .cellinput { text-overflow: ellipsis; }

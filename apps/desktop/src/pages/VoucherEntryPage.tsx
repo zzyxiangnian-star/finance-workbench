@@ -281,7 +281,9 @@ export function VoucherEntryPage() {
     const p = pending.current;
     if (!p) return;
     pending.current = null;
-    cellRefs.current[p.row]?.[p.col]?.focus();
+    const el = cellRefs.current[p.row]?.[p.col];
+    el?.focus();
+    if (p.col === 0) el?.select();
     setFocusRow(p.row);
   }, [focusNonce]);
 
@@ -393,6 +395,14 @@ export function VoucherEntryPage() {
     if (c > 3) { r += 1; c = 0; }
     if (c < 0) { r -= 1; c = 3; }
     if (r < 0 || r >= form.lines.length) return false;
+    // 往下一行的摘要格走时，空行自动带上一行的摘要（选中状态，直接打字即可覆盖）
+    if (c === 0 && dir === 1 && r > 0) {
+      const cur = form.lines[r];
+      const prev = form.lines[r - 1];
+      if (!cur.summary && !cur.account_code && !cur.debit && !cur.credit && prev.summary) {
+        patchLine(r, { summary: prev.summary });
+      }
+    }
     queueFocus(r, c);
     return true;
   };
@@ -448,6 +458,7 @@ export function VoucherEntryPage() {
   const dr = sumMoney(form.lines.map((l) => l.debit || "0"));
   const cr = sumMoney(form.lines.map((l) => l.credit || "0"));
   const balanced = dr === cr;
+  const empty = isZero(dr) && isZero(cr);
   const gap = fromCents(toCents(dr) >= toCents(cr) ? toCents(dr) - toCents(cr) : toCents(cr) - toCents(dr));
   const bounds = editPeriod ? monthBounds(editPeriod) : null;
 
@@ -659,12 +670,12 @@ export function VoucherEntryPage() {
                 <td colSpan={2}>
                   <div className="entry-total">
                     <span>合计</span>
-                    <span className={"tag " + (balanced ? "ok" : "bad")}>{balanced ? "平衡" : `差额 ${formatMoney(gap)}`}</span>
-                    {balanced && <span className="entry-upper">{moneyUpper(dr)}</span>}
+                    {!empty && <span className={"tag " + (balanced ? "ok" : "bad")}>{balanced ? "平衡" : `差额 ${formatMoney(gap)}`}</span>}
+                    {!empty && balanced && <span className="entry-upper">{moneyUpper(dr)}</span>}
                   </div>
                 </td>
-                <td className="num">{formatMoney(dr)}</td>
-                <td className="num">{formatMoney(cr)}</td>
+                <td className="num">{empty ? "" : formatMoney(dr)}</td>
+                <td className="num">{empty ? "" : formatMoney(cr)}</td>
                 <td />
               </tr>
             </tfoot>
