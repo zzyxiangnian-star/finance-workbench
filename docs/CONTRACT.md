@@ -28,11 +28,14 @@
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | GET | /api/health | 健康检查，不需要令牌 |
-| GET | /api/accounts | 科目列表（`include_disabled`） |
+| GET | /api/accounts | 科目列表（`include_disabled`）。每项多 `py`：名称拼音首字母小写，分隔符保留，如管理费用-办公费 → `glfy-bgf` |
+| GET | /api/accounts/{code}/balance | 单科目余额：`period`、`include_unposted`（默认 false）。返回 opening/debit/credit/closing |
+| GET | /api/summaries | 最近摘要：`q`、`limit`（默认 10）。去重，按最近使用时间倒序，返回字符串数组 |
 | GET | /api/periods | 期间列表 |
 | POST | /api/periods/{p}/close | 结账 |
 | GET | /api/vouchers | 查询：period, date_from, date_to, status, keyword, account_code(前缀), min_amount, max_amount, limit, offset → `{total, items}` |
 | POST | /api/vouchers | 新建（总是草稿） |
+| GET | /api/vouchers/next-number | 预览下一号：`period`、`word`（默认记）→ `{"display_no":"记-0006"}`。不占号，保存时仍由后端分配 |
 | GET/PUT/DELETE | /api/vouchers/{id} | 取 / 改（仅草稿）/ 删（仅草稿） |
 | POST | /api/vouchers/{id}/review | 审核（审核人 ≠ 制单人） |
 | POST | /api/vouchers/{id}/unreview | 反审核（仅原审核人，未记账） |
