@@ -5,6 +5,7 @@ import { getBackendConfig, ping, type BackendConfig } from "./lib/backend";
 import { Ctx } from "./lib/context";
 import { usePersistent } from "./lib/persist";
 import { ROUTES } from "./lib/routes";
+import { ChatPage } from "./pages/ChatPage";
 import { LedgerPage } from "./pages/LedgerPage";
 import { Placeholder } from "./pages/Placeholder";
 import { createClient } from "./shared/api";
@@ -61,7 +62,9 @@ export default function App() {
         <Routes>
           <Route element={<Shell />}>
             <Route path="/ledger" element={<LedgerPage />} />
-            {ROUTES.filter((r) => r.path !== "/ledger").map((r) => <Route key={r.path} path={r.path} element={<Placeholder />} />)}
+            <Route path="/chat" element={<ChatPage />} />
+            <Route path="/chat/:id" element={<ChatPage />} />
+            {ROUTES.filter((r) => r.path !== "/ledger" && r.path !== "/chat").map((r) => <Route key={r.path} path={r.path} element={<Placeholder />} />)}
             <Route path="*" element={<Placeholder />} />
           </Route>
         </Routes>

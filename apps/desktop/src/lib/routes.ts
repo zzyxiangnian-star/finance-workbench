@@ -23,4 +23,7 @@ export const ROUTES: RouteDef[] = [
   { path: "/settings", title: "设置", icon: "settings", keywords: "shezhi" },
 ];
 
-export const routeOf = (path: string) => ROUTES.find((r) => r.path === path);
+export const routeOf = (path: string) => {
+  if (path === "/chat" || path.startsWith("/chat/")) return ROUTES.find((r) => r.path === "/chat");
+  return ROUTES.find((r) => r.path === path);
+};

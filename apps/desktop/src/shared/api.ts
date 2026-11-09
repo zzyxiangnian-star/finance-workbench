@@ -117,14 +117,41 @@ export interface ClientConfig {
 
 /** 对话流事件（由 /api/chat 的 SSE 解析而来） */
 export type ChatEvent =
+  | { type: "session"; sessionId: string }
   | { type: "delta"; text: string }
-  | { type: "tool"; id: string; name: string; label?: string; status: "running" | "completed" } // hermes.tool.progress
+  | { type: "tool"; id: string; name: string; label?: string; status: "running" | "completed" }
   | { type: "error"; code: string; message: string }
   | { type: "done" };
 
-export interface ChatMessage {
-  role: "user" | "assistant" | "system";
+export interface ChatSession {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ChatTool {
+  id: string;
+  name: string;
+  status: "running" | "completed" | string;
+}
+
+export interface ChatStoredMessage {
+  id: number;
+  role: "user" | "assistant";
   content: string;
+  tools: ChatTool[];
+  created_at: string;
+}
+
+export interface ChatDetail extends ChatSession {
+  messages: ChatStoredMessage[];
+}
+
+export interface HermesStatus {
+  configured: boolean;
+  reachable: boolean;
+  model: string | null;
 }
 
 export function createClient(cfg: ClientConfig) {
@@ -167,18 +194,33 @@ export function createClient(cfg: ClientConfig) {
     post: (id: number) => req<Voucher>("POST", `/api/vouchers/${id}/post`),
     trialBalance: (period: Period, includeUnposted = false) =>
       req<TrialBalance>("GET", "/api/reports/trial-balance", undefined, { period, include_unposted: includeUnposted }),
+    lookupVoucher: (no: string, period?: Period) =>
+      req<Voucher[]>("GET", "/api/vouchers/lookup", undefined, { no, period }),
+    chats: () => req<ChatSession[]>("GET", "/api/chats"),
+    chatSession: (id: string) => req<ChatDetail>("GET", `/api/chats/${id}`),
+    renameChat: (id: string, title: string) => req<ChatSession>("PATCH", `/api/chats/${id}`, { title }),
+    deleteChat: (id: string) => req<{ ok: true }>("DELETE", `/api/chats/${id}`),
+    hermesStatus: () => req<HermesStatus>("GET", "/api/hermes/status"),
 
-    /** 流式对话。用法：for await (const ev of api.chat(msgs, sid)) {...} */
-    async *chat(messages: ChatMessage[], sessionId?: string, signal?: AbortSignal): AsyncGenerator<ChatEvent> {
+    /** 流式对话。没有 sessionId 时服务端新建会话，第一个事件是 session。 */
+    async *chat(
+      message: string,
+      sessionId?: string,
+      opts?: { signal?: AbortSignal; regenerate?: boolean },
+    ): AsyncGenerator<ChatEvent> {
       const res = await fetch(cfg.baseUrl + "/api/chat", {
         method: "POST",
         headers: { ...headers(), "Content-Type": "application/json" },
-        body: JSON.stringify({ messages, session_id: sessionId }),
-        signal,
+        body: JSON.stringify({
+          message,
+          session_id: sessionId,
+          regenerate: opts?.regenerate ?? false,
+        }),
+        signal: opts?.signal,
       });
       if (!res.ok || !res.body) {
         const data = await res.json().catch(() => ({}));
-        const e = data.detail ?? {};
+        const e = data.error ?? data.detail ?? {};
         yield { type: "error", code: e.code ?? "http_error", message: e.message ?? `对话失败（${res.status}）` };
         return;
       }
@@ -217,6 +259,7 @@ function parseSse(block: string): ChatEvent | null {
   if (raw === "[DONE]") return { type: "done" };
   try {
     const j = JSON.parse(raw);
+    if (event === "session") return { type: "session", sessionId: j.session_id };
     if (event === "hermes.tool.progress")
       return { type: "tool", id: j.toolCallId ?? "", name: j.tool ?? "工具", label: j.label, status: j.status === "completed" ? "completed" : "running" };
     if (event === "error") return { type: "error", code: j.code ?? String(j.status ?? "error"), message: j.message ?? j.detail ?? "出错了" };

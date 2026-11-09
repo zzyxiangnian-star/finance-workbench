@@ -6,3 +6,4 @@
 | 日期 | 拷进来的位置 | 来源项目与文件 | 许可证 | 说明 |
 |---|---|---|---|---|
 | — | — | 暂无 | — | 目前全部为自写代码；样式和图标来自本项目自己的界面原型 docs/prototype |
+| 2026-11-09 | apps/desktop 依赖 react-markdown、remark-gfm | remarkjs/react-markdown、remarkjs/remark-gfm | MIT | 对话页渲染 Markdown，未拷贝源码 |

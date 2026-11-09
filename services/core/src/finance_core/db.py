@@ -4,7 +4,7 @@
 import sqlite3
 from pathlib import Path
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS meta (
@@ -80,6 +80,24 @@ CREATE TABLE IF NOT EXISTS audit_log (
     target TEXT NOT NULL,
     detail TEXT NOT NULL DEFAULT ''
 );
+
+-- AI 对话。session id 用文本，消息用自增序号保证顺序。
+CREATE TABLE IF NOT EXISTS chat_sessions (
+    id         TEXT PRIMARY KEY,
+    title      TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    session_id  TEXT NOT NULL REFERENCES chat_sessions(id) ON DELETE CASCADE,
+    role        TEXT NOT NULL CHECK (role IN ('user','assistant')),
+    content     TEXT NOT NULL,
+    tools_json  TEXT NOT NULL DEFAULT '[]',
+    created_at  TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_chat_messages_session ON chat_messages(session_id, id);
 """
 
 
@@ -95,4 +113,7 @@ def connect(path: str | Path) -> sqlite3.Connection:
         "INSERT OR IGNORE INTO meta(key, value) VALUES ('schema_version', ?)",
         (str(SCHEMA_VERSION),),
     )
+    row = conn.execute("SELECT value FROM meta WHERE key = 'schema_version'").fetchone()
+    if int(row["value"]) < SCHEMA_VERSION:
+        conn.execute("UPDATE meta SET value = ? WHERE key = 'schema_version'", (str(SCHEMA_VERSION),))
     return conn

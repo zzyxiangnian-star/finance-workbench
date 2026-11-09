@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import os
+import json
 from contextlib import asynccontextmanager
 from urllib.parse import unquote
 
@@ -16,6 +17,11 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
+
+from .chat_store import (
+    add_message, create_session, delete_session, drop_last_assistant, get_session, history,
+    list_sessions, rename_session, title_from,
+)
 
 from .config import Settings
 from .db import connect
@@ -44,9 +50,68 @@ class VoucherIn(BaseModel):
         )
 
 
+def finalize_content(text: str, stopped: bool) -> str:
+    return text + "（已停止）" if stopped else text
+
+
+def apply_sse_block(block: str, acc_text: list[str], acc_tools: dict[str, dict]) -> None:
+    event = "message"
+    data: list[str] = []
+    for line in block.split("\n"):
+        if line.startswith(":"):
+            continue
+        if line.startswith("event:"):
+            event = line[6:].strip()
+        elif line.startswith("data:"):
+            data.append(line[5:].lstrip())
+    raw = "\n".join(data)
+    if not raw or raw == "[DONE]":
+        return
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        return
+    if event == "hermes.tool.progress":
+        tid = str(payload.get("toolCallId") or payload.get("tool") or "")
+        acc_tools[tid] = {
+            "id": str(payload.get("toolCallId") or ""),
+            "name": str(payload.get("tool") or "工具"),
+            "status": "completed" if payload.get("status") == "completed" else "running",
+        }
+        return
+    choices = payload.get("choices") or []
+    delta = (choices[0].get("delta") if choices else None) or {}
+    piece = delta.get("content")
+    if piece:
+        acc_text.append(piece)
+
+
+async def iter_upstream(request: Request, source, on_block, stopped: dict):
+    """把上游 SSE 转出去。客户端已断开时停下，stopped['v'] 记为 True。"""
+    buf = ""
+    async for chunk in source:
+        if await request.is_disconnected():
+            stopped["v"] = True
+            return
+        yield chunk
+        buf += chunk
+        while "\n\n" in buf:
+            block, buf = buf.split("\n\n", 1)
+            on_block(block)
+    if await request.is_disconnected():
+        stopped["v"] = True
+    elif buf.strip():
+        on_block(buf)
+
+
 class ChatIn(BaseModel):
-    messages: list[dict]
+    message: str = ""
     session_id: str | None = None
+    regenerate: bool = False
+
+
+class TitleIn(BaseModel):
+    title: str
 
 
 def create_app(settings: Settings | None = None, demo: bool | None = None) -> FastAPI:
@@ -122,6 +187,10 @@ def create_app(settings: Settings | None = None, demo: bool | None = None) -> Fa
     def create(body: VoucherIn, request: Request, actor: str = Depends(user)):
         return L(request).create_voucher(body.to_input(), actor)
 
+    @app.get("/api/vouchers/lookup", dependencies=deps)
+    def lookup(request: Request, no: str, period: str | None = None):
+        return L(request).lookup_vouchers(no, period)
+
     @app.get("/api/vouchers/{vid}", dependencies=deps)
     def get(vid: int, request: Request):
         return L(request).get_voucher(vid)
@@ -155,33 +224,127 @@ def create_app(settings: Settings | None = None, demo: bool | None = None) -> Fa
     def audit(request: Request, target: str | None = None, limit: int = 100):
         return L(request).audit_log(target, limit)
 
-    # ---------- AI 对话：转发到 Hermes ----------
-    hermes_url = os.environ.get("HERMES_API_URL", "http://127.0.0.1:8642")
-    hermes_key = os.environ.get("HERMES_API_KEY", "")
+    # ---------- AI 对话 ----------
+    def hermes_cfg() -> tuple[str, str]:
+        return os.environ.get("HERMES_API_URL", "http://127.0.0.1:8642"), os.environ.get("HERMES_API_KEY", "")
+
+    @app.get("/api/hermes/status", dependencies=deps)
+    async def hermes_status():
+        url, key = hermes_cfg()
+        if not key:
+            return {"configured": False, "reachable": False, "model": None}
+        try:
+            async with httpx.AsyncClient(timeout=2, trust_env=False) as client:
+                r = await client.get(f"{url}/v1/models", headers={"Authorization": f"Bearer {key}"})
+            if r.status_code != 200:
+                return {"configured": True, "reachable": False, "model": None}
+            data = r.json()
+            model = None
+            if isinstance(data, dict) and data.get("data"):
+                model = data["data"][0].get("id")
+            return {"configured": True, "reachable": True, "model": model}
+        except httpx.HTTPError:
+            return {"configured": True, "reachable": False, "model": None}
+
+    @app.get("/api/chats", dependencies=deps)
+    def chats(request: Request):
+        return list_sessions(L(request).conn)
+
+    @app.get("/api/chats/{sid}", dependencies=deps)
+    def chat_detail(sid: str, request: Request):
+        found = get_session(L(request).conn, sid)
+        if found is None:
+            raise HTTPException(404, detail={"code": "chat_not_found", "message": "没有这个对话"})
+        return found
+
+    @app.patch("/api/chats/{sid}", dependencies=deps)
+    def chat_rename(sid: str, body: TitleIn, request: Request):
+        title = body.title.strip()
+        if not title:
+            raise HTTPException(422, detail={"code": "empty_title", "message": "标题不能为空"})
+        found = rename_session(L(request).conn, sid, title[:40])
+        if found is None:
+            raise HTTPException(404, detail={"code": "chat_not_found", "message": "没有这个对话"})
+        return found
+
+    @app.delete("/api/chats/{sid}", dependencies=deps)
+    def chat_delete(sid: str, request: Request):
+        if not delete_session(L(request).conn, sid):
+            raise HTTPException(404, detail={"code": "chat_not_found", "message": "没有这个对话"})
+        return {"ok": True}
 
     @app.post("/api/chat", dependencies=deps)
-    async def chat(body: ChatIn, actor: str = Depends(user)):
-        """流式返回 Hermes 的 SSE 原文（chat.completion.chunk + hermes.tool.progress）。"""
-        if not hermes_key:
+    async def chat(body: ChatIn, request: Request, actor: str = Depends(user)):
+        """把本会话历史发给 Hermes，并把回答和工具调用存下来。"""
+        url, key = hermes_cfg()
+        if not key:
             raise HTTPException(503, detail={"code": "hermes_not_configured", "message": "未配置 HERMES_API_KEY"})
-        headers = {"Authorization": f"Bearer {hermes_key}"}
-        if body.session_id:
-            headers["X-Hermes-Session-Id"] = body.session_id
-        payload = {"model": "hermes-agent", "messages": body.messages, "stream": True}
+        conn = L(request).conn
+        text = body.message.strip()
+        if body.regenerate:
+            if not body.session_id:
+                raise HTTPException(422, detail={"code": "no_session", "message": "重新生成需要已有对话"})
+            if get_session(conn, body.session_id) is None:
+                raise HTTPException(404, detail={"code": "chat_not_found", "message": "没有这个对话"})
+            drop_last_assistant(conn, body.session_id)
+            sid = body.session_id
+        else:
+            if not text:
+                raise HTTPException(422, detail={"code": "empty_message", "message": "请输入要问的内容"})
+            if body.session_id:
+                if get_session(conn, body.session_id) is None:
+                    raise HTTPException(404, detail={"code": "chat_not_found", "message": "没有这个对话"})
+                sid = body.session_id
+            else:
+                sid = create_session(conn, title_from(text))
+            add_message(conn, sid, "user", text)
+
+        prior = history(conn, sid)
+        if not prior or prior[-1]["role"] != "user":
+            raise HTTPException(422, detail={"code": "no_message", "message": "这个对话里没有可以重新生成的提问"})
+
+        acc_text: list[str] = []
+        acc_tools: dict[str, dict] = {}
+        stopped_flag = {"v": False}
 
         async def relay():
-            async with httpx.AsyncClient(timeout=httpx.Timeout(10, read=None)) as client:
-                try:
-                    async with client.stream("POST", f"{hermes_url}/v1/chat/completions",
-                                             json=payload, headers=headers) as r:
-                        if r.status_code != 200:
-                            text = (await r.aread()).decode("utf-8", "replace")[:500]
-                            yield f'event: error\ndata: {{"status": {r.status_code}, "detail": {text!r}}}\n\n'
+            saved = False
+
+            def save() -> None:
+                nonlocal saved
+                if saved:
+                    return
+                saved = True
+                content = finalize_content("".join(acc_text), stopped_flag["v"])
+                if content or acc_tools or stopped_flag["v"]:
+                    add_message(conn, sid, "assistant", content, list(acc_tools.values()))
+
+            try:
+                yield f"event: session\ndata: {json.dumps({'session_id': sid})}\n\n"
+                headers = {"Authorization": f"Bearer {key}", "X-Hermes-Session-Id": sid}
+                payload = {"model": "hermes-agent", "messages": prior, "stream": True}
+                async with httpx.AsyncClient(timeout=httpx.Timeout(10, read=None), trust_env=False) as client:
+                    async with client.stream(
+                        "POST", f"{url}/v1/chat/completions", json=payload, headers=headers,
+                    ) as upstream:
+                        if upstream.status_code != 200:
+                            detail = (await upstream.aread()).decode("utf-8", "replace")[:500]
+                            yield f'event: error\ndata: {{"status": {upstream.status_code}, "detail": {detail!r}}}\n\n'
                             return
-                        async for chunk in r.aiter_raw():
+                        async for chunk in iter_upstream(
+                            request, upstream.aiter_text(),
+                            lambda block: apply_sse_block(block, acc_text, acc_tools),
+                            stopped_flag,
+                        ):
                             yield chunk
-                except httpx.ConnectError:
-                    yield 'event: error\ndata: {"code": "hermes_unreachable", "message": "连不上 Hermes，请确认它已启动"}\n\n'
+            except httpx.HTTPError:
+                yield 'event: error\ndata: {"code": "hermes_unreachable", "message": "连不上 Hermes，请确认它已启动"}\n\n'
+            except BaseException:
+                stopped_flag["v"] = True
+                save()
+                raise
+            else:
+                save()
 
         return StreamingResponse(relay(), media_type="text/event-stream")
 

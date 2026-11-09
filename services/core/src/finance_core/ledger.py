@@ -306,6 +306,19 @@ class Ledger:
             ],
         }
 
+    def lookup_vouchers(self, no: str, period: str | None = None) -> list[dict]:
+        """按凭证号查找。no 形如“记-0003”。不给 period 时返回所有期间里匹配的凭证。"""
+        word, sep, num = no.partition("-")
+        if not sep or not word or not num.isdigit():
+            raise LedgerError("bad_voucher_no", "凭证号格式应为“记-0003”")
+        sql = "SELECT id FROM vouchers WHERE word = ? AND number = ?"
+        args: list = [word, int(num)]
+        if period:
+            sql += " AND period = ?"
+            args.append(period)
+        sql += " ORDER BY period DESC, id DESC"
+        return [self.get_voucher(r["id"]) for r in self.conn.execute(sql, args)]
+
     def search_vouchers(
         self,
         period: str | None = None,
