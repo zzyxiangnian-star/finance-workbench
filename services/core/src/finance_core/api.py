@@ -25,6 +25,7 @@ from .chat_store import (
 
 from .config import Settings
 from .db import connect
+from .books import book_periods, ledger_book, opening_view, save_opening
 from .ledger import AI_PREFIX, Ledger, LedgerError, LineInput, VoucherInput
 from .pinyin import initials
 from .seed import seed_accounts, seed_demo
@@ -113,6 +114,18 @@ class ChatIn(BaseModel):
 
 class TitleIn(BaseModel):
     title: str
+
+
+class OpeningItemIn(BaseModel):
+    account_code: str
+    amount: str = "0"
+    ytd_debit: str = "0"
+    ytd_credit: str = "0"
+
+
+class OpeningIn(BaseModel):
+    start_period: str | None = None
+    items: list[OpeningItemIn] = []
 
 
 def create_app(settings: Settings | None = None, demo: bool | None = None) -> FastAPI:
@@ -228,6 +241,32 @@ def create_app(settings: Settings | None = None, demo: bool | None = None) -> Fa
     @app.post("/api/vouchers/{vid}/post", dependencies=deps)
     def post(vid: int, request: Request, actor: str = Depends(user)):
         return L(request).post(vid, actor)
+
+    @app.get("/api/opening-balances", dependencies=deps)
+    def get_opening(request: Request):
+        return opening_view(L(request))
+
+    @app.put("/api/opening-balances", dependencies=deps)
+    def put_opening(body: OpeningIn, request: Request, actor: str = Depends(user)):
+        return save_opening(
+            L(request), actor, body.start_period, [item.model_dump() for item in body.items],
+        )
+
+    @app.get("/api/books/periods", dependencies=deps)
+    def books_periods(request: Request):
+        return book_periods(L(request))
+
+    @app.get("/api/books/detail", dependencies=deps)
+    def books_detail(
+        account_code: str, period_from: str, period_to: str, request: Request, include_unposted: bool = False,
+    ):
+        return ledger_book(L(request), account_code, period_from, period_to, include_unposted, True)
+
+    @app.get("/api/books/general", dependencies=deps)
+    def books_general(
+        account_code: str, period_from: str, period_to: str, request: Request, include_unposted: bool = False,
+    ):
+        return ledger_book(L(request), account_code, period_from, period_to, include_unposted, False)
 
     @app.get("/api/reports/trial-balance", dependencies=deps)
     def trial_balance(period: str, request: Request, include_unposted: bool = False):

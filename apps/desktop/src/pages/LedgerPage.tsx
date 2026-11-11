@@ -9,18 +9,23 @@ import { useApp } from "../lib/context";
 import { formatMoney, formatPeriod, shortDate, sumMoney } from "../lib/format";
 import { useDebounced } from "../lib/useDebounced";
 import { ApiError, type PeriodInfo, type Voucher, type VoucherStatus } from "../shared/api";
+import { BooksPage } from "./BooksPage";
 import { VoucherDetail } from "./VoucherDetail";
 
 type StatusFilter = "all" | VoucherStatus;
 type SourceFilter = "all" | Voucher["source"];
-const TABS = ["凭证", "账簿", "科目与辅助核算", "期末结账"] as const;
+const TABS = [
+  { id: "vouchers", title: "凭证" },
+  { id: "books", title: "账簿" },
+  { id: "accounts", title: "科目与辅助核算" },
+  { id: "close", title: "期末结账" },
+] as const;
 
 export function LedgerPage() {
   const { api } = useApp();
   const nav = useNavigate();
   const [params, setParams] = useSearchParams();
   const rp = useRightPane();
-  const [tab, setTab] = useState<(typeof TABS)[number]>("凭证");
   const [periods, setPeriods] = useState<PeriodInfo[]>([]);
   const period = params.get("period") ?? "all";
   const [status, setStatus] = useState<StatusFilter>("all");
@@ -30,7 +35,9 @@ export function LedgerPage() {
   const [items, setItems] = useState<Voucher[] | null>(null);
   const [total, setTotal] = useState(0);
   const [err, setErr] = useState<string | null>(null);
+  const tab = params.get("tab") ?? "vouchers";
   const selectedId = Number(params.get("v")) || null;
+  const [fetched, setFetched] = useState<Voucher | null>(null);
 
   const setParam = useCallback((k: string, v: string | null) => {
     setParams((p) => {
@@ -70,14 +77,23 @@ export function LedgerPage() {
 
   // 来源筛选后端暂不支持，在已加载的结果里筛
   const shown = useMemo(() => (items ?? []).filter((v) => source === "all" || v.source === source), [items, source]);
-  const selected = shown.find((v) => v.id === selectedId) ?? items?.find((v) => v.id === selectedId) ?? null;
+  const listed = shown.find((v) => v.id === selectedId) ?? items?.find((v) => v.id === selectedId) ?? null;
+  useEffect(() => {
+    if (!selectedId) { setFetched(null); return; }
+    if (listed) { setFetched(listed); return; }
+    api.voucher(selectedId).then(setFetched).catch(() => setFetched(null));
+  }, [api, selectedId, listed]);
+  const selected = listed ?? fetched;
 
   const open = (v: Voucher) => { setParam("v", String(v.id)); rp.setOpen(true); };
   const close = () => { setParam("v", null); rp.setOpen(false); };
 
   useEffect(() => { if (selectedId) rp.setOpen(true); }, [selectedId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onChanged = (nv: Voucher) => setItems((list) => list?.map((v) => (v.id === nv.id ? nv : v)) ?? null);
+  const onChanged = (nv: Voucher) => {
+    setItems((list) => list?.map((v) => (v.id === nv.id ? nv : v)) ?? null);
+    setFetched(nv);
+  };
 
   const periodOptions = [{ value: "all", label: "全部期间" }, ...[...periods].reverse().map((p) => ({
     value: p.period, label: formatPeriod(p.period) + (p.status === "closed" ? "（已结账）" : ""),
@@ -86,9 +102,11 @@ export function LedgerPage() {
   return (
     <>
       <TopActions>
-        <Dropdown ariaLabel="会计期间" head="会计期间" icon={<Icon name="clock" size={16} />} value={period}
-          label={period === "all" ? "全部期间" : formatPeriod(period)} options={periodOptions}
-          onChange={(v) => setParam("period", v)} />
+        {tab !== "books" && (
+          <Dropdown ariaLabel="会计期间" head="会计期间" icon={<Icon name="clock" size={16} />} value={period}
+            label={period === "all" ? "全部期间" : formatPeriod(period)} options={periodOptions}
+            onChange={(v) => setParam("period", v)} />
+        )}
         <button className="iconbtn tt" type="button" aria-label="刷新" onClick={() => load()}>
           <Icon name="refresh" />
           <Tip>刷新</Tip>
@@ -98,12 +116,15 @@ export function LedgerPage() {
       <main className="content">
         <div className="tabs" role="group" aria-label="记账">
           {TABS.map((t) => (
-            <button key={t} type="button" className={t === tab ? "on" : ""} aria-pressed={t === tab} onClick={() => setTab(t)}>{t}</button>
+            <button key={t.id} type="button" className={tab === t.id ? "on" : ""} aria-pressed={tab === t.id}
+              onClick={() => setParam("tab", t.id === "vouchers" ? null : t.id)}>{t.title}</button>
           ))}
         </div>
 
-        {tab !== "凭证" ? (
-          <div className="empty"><span className="t">{tab}即将上线</span><span>在第一期第 6 步里做。</span></div>
+        {tab === "books" ? (
+          <BooksPage onOpenVoucher={(id) => { setParam("v", String(id)); rp.setOpen(true); }} />
+        ) : tab !== "vouchers" ? (
+          <div className="empty"><span className="t">{TABS.find((t) => t.id === tab)?.title}即将上线</span><span>在第一期后面的步骤里做。</span></div>
         ) : (
           <>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>

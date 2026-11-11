@@ -22,6 +22,13 @@ def test_stdio_roundtrip(tmp_path):
                 await s.initialize()
                 names = {t.name for t in (await s.list_tools()).tools}
                 assert "create_draft_voucher" in names
+                assert "detail_ledger" in names
+                res = await s.call_tool("detail_ledger", {
+                    "account_code": "100201", "period_from": "2026-11", "period_to": "2026-11",
+                })
+                book = json.loads(res.content[0].text)
+                assert book["opening"]["amount"] == "500000.00"
+                assert book["periods"][0]["lines"][0]["display_no"] == "记-0001"
                 res = await s.call_tool("search_vouchers", {"keyword": "差旅"})
                 data = json.loads(res.content[0].text)
                 assert data["items"][0]["lines"][0]["account_name"] == "管理费用-差旅费"

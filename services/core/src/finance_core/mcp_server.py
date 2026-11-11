@@ -12,6 +12,7 @@ import os
 
 from mcp.server.mcpserver import MCPServer
 
+from .books import ledger_book
 from .config import Settings
 from .db import connect
 from .ledger import Ledger, LedgerError, LineInput, VoucherInput
@@ -67,6 +68,11 @@ def build_server(ledger: Ledger) -> MCPServer:
     def account_balance(account_code: str, period: str, include_unposted: bool = False) -> str:
         """某科目在某期间的期初、本期借贷发生额和期末余额（上级科目汇总下级）。默认只算已记账凭证。"""
         return run(ledger.account_balance, account_code, period, include_unposted)
+
+    @server.tool()
+    def detail_ledger(account_code: str, period_from: str, period_to: str, include_unposted: bool = False) -> str:
+        """明细账。account_code 可以是上级科目。期间 YYYY-MM。默认只含已记账凭证。返回期初、逐行余额、本月合计和本年累计。"""
+        return run(ledger_book, ledger, account_code, period_from, period_to, include_unposted, True)
 
     @server.tool()
     def trial_balance(period: str, include_unposted: bool = False) -> str:

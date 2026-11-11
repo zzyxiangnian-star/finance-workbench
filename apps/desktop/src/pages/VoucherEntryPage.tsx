@@ -496,6 +496,9 @@ export function VoucherEntryPage() {
               <dt>期末</dt><dd className="num">{formatMoney(bal.closing)}</dd>
             </dl>
             <span className="cap">含未记账凭证。</span>
+            <button className="btn" type="button" onClick={() => nav(
+              `/ledger?tab=books&book=detail&account=${focusCode}&from=${bal.period}&to=${bal.period}`,
+            )}>查看明细账</button>
           </>
         )}
         {balState === "error" && balErr && <Alert kind="bad">{balErr}</Alert>}

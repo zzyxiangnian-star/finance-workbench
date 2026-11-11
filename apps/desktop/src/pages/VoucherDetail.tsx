@@ -99,7 +99,9 @@ export function VoucherDetail({ v, onChanged, onClose, onDeleted }: {
               {v.lines.map((l) => (
                 <tr key={l.line_no}>
                   <td className="wrap">
-                    <div>{l.account_name}</div>
+                    <button className="textlink" type="button" onClick={() => nav(
+                      `/ledger?tab=books&book=detail&account=${l.account_code}&from=${v.period}&to=${v.period}`,
+                    )}>{l.account_name}</button>
                     <div className="cap">{l.account_code}，{l.summary}</div>
                   </td>
                   <td className="num">{isZero(l.debit) ? "" : formatMoney(l.debit)}</td>

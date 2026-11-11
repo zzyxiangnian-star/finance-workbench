@@ -161,6 +161,74 @@ export interface ChatDetail extends ChatSession {
   messages: ChatStoredMessage[];
 }
 
+export type BookSide = "debit" | "credit" | "flat";
+
+export interface OpeningItem {
+  account_code: string;
+  account_name: string;
+  category: Account["category"];
+  direction: Account["direction"];
+  parent_code: string | null;
+  level: number;
+  is_leaf: boolean;
+  amount: Money;
+  ytd_debit: Money;
+  ytd_credit: Money;
+  year_opening: Money;
+}
+
+export interface OpeningView {
+  start_period: Period;
+  mid_year: boolean;
+  locked: boolean;
+  lock_reason: string | null;
+  start_locked: boolean;
+  items: OpeningItem[];
+  totals: { dr: Money; cr: Money; diff: Money; balanced: boolean };
+}
+
+export interface OpeningLineInput {
+  account_code: string;
+  amount: Money;
+  ytd_debit?: Money;
+  ytd_credit?: Money;
+}
+
+export interface BookAmount {
+  debit: Money;
+  credit: Money;
+  side: BookSide;
+  balance: Money;
+}
+
+export interface BookLine {
+  voucher_id: number;
+  display_no: string;
+  status: VoucherStatus;
+  date: string;
+  account_code: string;
+  account_name: string;
+  summary: string;
+  debit: Money;
+  credit: Money;
+  side: BookSide;
+  balance: Money;
+}
+
+export interface BookPeriod {
+  period: Period;
+  lines?: BookLine[];
+  month: BookAmount;
+  year: BookAmount;
+}
+
+export interface BookView {
+  account: { code: string; name: string; direction: Account["direction"] };
+  include_unposted: boolean;
+  opening: { period: Period; side: BookSide; amount: Money };
+  periods: BookPeriod[];
+}
+
 export interface HermesStatus {
   configured: boolean;
   reachable: boolean;
@@ -212,6 +280,18 @@ export function createClient(cfg: ClientConfig) {
     review: (id: number) => req<Voucher>("POST", `/api/vouchers/${id}/review`),
     unreview: (id: number) => req<Voucher>("POST", `/api/vouchers/${id}/unreview`),
     post: (id: number) => req<Voucher>("POST", `/api/vouchers/${id}/post`),
+    openingBalances: () => req<OpeningView>("GET", "/api/opening-balances"),
+    saveOpeningBalances: (body: { start_period?: Period; items: OpeningLineInput[] }) =>
+      req<OpeningView>("PUT", "/api/opening-balances", body),
+    bookPeriods: () => req<Period[]>("GET", "/api/books/periods"),
+    detailLedger: (accountCode: string, periodFrom: Period, periodTo: Period, includeUnposted = false) =>
+      req<BookView>("GET", "/api/books/detail", undefined, {
+        account_code: accountCode, period_from: periodFrom, period_to: periodTo, include_unposted: includeUnposted,
+      }),
+    generalLedger: (accountCode: string, periodFrom: Period, periodTo: Period, includeUnposted = false) =>
+      req<BookView>("GET", "/api/books/general", undefined, {
+        account_code: accountCode, period_from: periodFrom, period_to: periodTo, include_unposted: includeUnposted,
+      }),
     trialBalance: (period: Period, includeUnposted = false) =>
       req<TrialBalance>("GET", "/api/reports/trial-balance", undefined, { period, include_unposted: includeUnposted }),
     lookupVoucher: (no: string, period?: Period) =>

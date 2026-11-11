@@ -176,6 +176,7 @@ class Ledger:
         if is_ai(actor) and v.source != "ai":
             v.source = "ai"
         period, rows = self._validate(v)
+        self._check_after_start(period)
         with self._tx():
             self._check_period_open(period)
             self.ensure_period(period)
@@ -202,6 +203,7 @@ class Ledger:
         if cur["status"] != "draft":
             raise LedgerError("not_draft", "只有草稿凭证可以修改，请先反审核")
         period, rows = self._validate(v)
+        self._check_after_start(period)
         if period != cur["period"]:
             raise LedgerError("period_change", "不能把凭证改到其他期间，请删除后重建")
         with self._tx():
@@ -266,6 +268,14 @@ class Ledger:
         cur = self._get_row(vid)
         if cur["status"] != "reviewed":
             raise LedgerError("bad_status", "只有已审核的凭证可以记账")
+        from .books import opening_totals
+
+        totals = opening_totals(self)
+        if not totals["balanced"]:
+            raise LedgerError(
+                "opening_unbalanced",
+                f"期初余额不平衡（借方 {totals['dr']}，贷方 {totals['cr']}），请先调整期初",
+            )
         with self._tx():
             self._check_period_open(cur["period"])
             self.conn.execute(
@@ -370,7 +380,43 @@ class Ledger:
         return {"total": count, "items": [self.get_voucher(i) for i in ids]}
 
     # ---------- 余额 ----------
+    def get_start_period(self) -> str:
+        """建账期间。没有记录时按最早的期初或凭证期间推断，都没有就用当月，并写回 meta。"""
+        row = self.conn.execute("SELECT value FROM meta WHERE key = 'start_period'").fetchone()
+        if row:
+            return row["value"]
+        earliest = self.conn.execute(
+            "SELECT MIN(period) AS p FROM (SELECT period FROM opening_balances UNION ALL SELECT period FROM vouchers)"
+        ).fetchone()["p"]
+        value = earliest or Date.today().strftime("%Y-%m")
+        self.write_start_period(value)
+        return value
+
+    def write_start_period(self, period: str) -> None:
+        self.conn.execute(
+            "INSERT INTO meta(key, value) VALUES ('start_period', ?) "
+            "ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            (period,),
+        )
+
+    def opening_lock_reason(self) -> str | None:
+        if self.conn.execute("SELECT 1 FROM vouchers WHERE status = 'posted' LIMIT 1").fetchone():
+            return "已有记账凭证，期初余额不能再改"
+        if self.conn.execute("SELECT 1 FROM periods WHERE status = 'closed' LIMIT 1").fetchone():
+            return "已有结账期间，期初余额不能再改"
+        return None
+
+    def _check_after_start(self, period: str) -> None:
+        start = self.get_start_period()
+        if period < start:
+            raise LedgerError("before_start", f"凭证日期早于建账期间 {start}")
+
     def set_opening_balance(self, account_code: str, period: str, amount: str, actor: str):
+        if is_ai(actor):
+            raise LedgerError("ai_forbidden", "期初余额必须由人录入")
+        locked = self.opening_lock_reason()
+        if locked:
+            raise LedgerError("opening_locked", locked)
         self._check_account(account_code)
         self.conn.execute(
             "INSERT INTO opening_balances(account_code, period, cents) VALUES (?,?,?) "

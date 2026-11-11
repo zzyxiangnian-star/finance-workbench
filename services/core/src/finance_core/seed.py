@@ -1,5 +1,7 @@
 """默认科目表（《小企业会计准则》常用一级科目 + 少量二级示例）和演示数据。"""
 
+from datetime import date
+
 from .ledger import Ledger, LineInput, VoucherInput
 
 # (code, name, category, direction, parent)
@@ -54,6 +56,8 @@ def seed_accounts(ledger: Ledger):
         return
     for row in DEFAULT_ACCOUNTS:
         ledger.add_account(*row)
+    today = date.today()
+    ledger.write_start_period(f"{today.year:04d}-{today.month:02d}")
 
 
 def seed_demo(ledger: Ledger):
@@ -61,6 +65,7 @@ def seed_demo(ledger: Ledger):
     seed_accounts(ledger)
     if ledger.conn.execute("SELECT COUNT(*) FROM vouchers").fetchone()[0]:
         return
+    ledger.write_start_period("2026-11")
     ledger.set_opening_balance("100201", "2026-11", "500000.00", "系统")
     ledger.set_opening_balance("3001", "2026-11", "500000.00", "系统")
     demo = [

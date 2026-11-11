@@ -98,6 +98,15 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     created_at  TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_chat_messages_session ON chat_messages(session_id, id);
+
+-- 建账前的本年累计发生额（年初到建账期间之前）。金额为整数分。
+CREATE TABLE IF NOT EXISTS opening_ytd (
+    account_code TEXT NOT NULL REFERENCES accounts(code),
+    period       TEXT NOT NULL,
+    debit_cents  INTEGER NOT NULL DEFAULT 0,
+    credit_cents INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (account_code, period)
+);
 """
 
 

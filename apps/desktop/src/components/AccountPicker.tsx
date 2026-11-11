@@ -4,7 +4,7 @@ import type { CellMove } from "./MoneyInput";
 
 /** 末级科目选择：编码、名称、拼音首字母都能筛。 */
 export function AccountPicker({
-  accounts, code, open, onOpenChange, onChange, onMove, ariaLabel, inputRef, onFocus,
+  accounts, code, open, onOpenChange, onChange, onMove, ariaLabel, inputRef, onFocus, allowParent,
 }: {
   accounts: Account[];
   code: string;
@@ -15,6 +15,7 @@ export function AccountPicker({
   ariaLabel: string;
   inputRef: (el: HTMLInputElement | null) => void;
   onFocus?: () => void;
+  allowParent?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [hi, setHi] = useState(0);
@@ -33,13 +34,13 @@ export function AccountPicker({
 
   const matches = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return accounts.filter((a) => a.enabled && a.is_leaf && (
+    return accounts.filter((a) => a.enabled && (allowParent || a.is_leaf) && (
       !q
       || a.code.toLowerCase().includes(q)
       || a.name.toLowerCase().includes(q)
       || a.py.toLowerCase().includes(q)
     ));
-  }, [accounts, query]);
+  }, [accounts, query, allowParent]);
 
   useEffect(() => {
     if (hi >= matches.length) setHi(0);
@@ -107,7 +108,7 @@ export function AccountPicker({
       />
       {open && (
         <div className="menu l picker-menu" role="listbox" aria-label="科目">
-          {matches.length === 0 && <div className="mhead">没有匹配的末级科目</div>}
+          {matches.length === 0 && <div className="mhead">{allowParent ? "没有匹配的科目" : "没有匹配的末级科目"}</div>}
           {matches.map((a, idx) => (
             <button
               key={a.code}

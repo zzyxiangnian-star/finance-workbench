@@ -4,11 +4,13 @@ import { formatMoney, fromCents, toCents } from "../lib/format";
 export type CellMove = (dir: 1 | -1, key: "Enter" | "Tab") => boolean;
 
 const TYPING = /^\d*\.?\d{0,2}$/;
+const TYPING_NEG = /^-?\d*\.?\d{0,2}$/;
 const PASTE_OK = /^\d+(\.\d{0,2})?$/;
+const PASTE_NEG = /^-?\d+(\.\d{0,2})?$/;
 
 /** 金额格：内部始终是字符串。失焦显示千分位；粘贴带逗号的数字会去掉逗号。 */
 export function MoneyInput({
-  value, onChange, onMove, onBalance, onSwap, ariaLabel, inputRef, onFocus,
+  value, onChange, onMove, onBalance, onSwap, ariaLabel, inputRef, onFocus, allowNegative, arrowMove,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -18,6 +20,8 @@ export function MoneyInput({
   ariaLabel: string;
   inputRef: (el: HTMLInputElement | null) => void;
   onFocus?: () => void;
+  allowNegative?: boolean;
+  arrowMove?: boolean;
 }) {
   const [focused, setFocused] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -55,14 +59,14 @@ export function MoneyInput({
       }}
       onChange={(e) => {
         const v = e.target.value.replace(/,/g, "").trim();
-        if (v !== "" && !TYPING.test(v)) return;
+        if (v !== "" && !(allowNegative ? TYPING_NEG : TYPING).test(v)) return;
         setDraft(v);
         onChange(v === "." ? "" : v);
       }}
       onPaste={(e) => {
         e.preventDefault();
         const raw = e.clipboardData.getData("text").replace(/,/g, "").replace(/\s/g, "");
-        if (!PASTE_OK.test(raw)) return;
+        if (!(allowNegative ? PASTE_NEG : PASTE_OK).test(raw)) return;
         commit(raw);
       }}
       onKeyDown={(e) => {
@@ -74,6 +78,11 @@ export function MoneyInput({
         if (e.key === " ") {
           e.preventDefault();
           onSwap();
+          return;
+        }
+        if (arrowMove && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+          e.preventDefault();
+          onMove(e.key === "ArrowDown" ? 1 : -1, "Enter");
           return;
         }
         if (e.key === "Enter" || e.key === "Tab") {

@@ -41,6 +41,11 @@
 | POST | /api/vouchers/{id}/unreview | 反审核（仅原审核人，未记账） |
 | POST | /api/vouchers/{id}/post | 记账（仅已审核） |
 | GET | /api/reports/trial-balance | 科目余额表：period, include_unposted |
+| GET | /api/opening-balances | 期初余额、本年累计、试算平衡、建账期间、是否锁定 |
+| PUT | /api/opening-balances | `{start_period?, items:[{account_code, amount, ytd_debit?, ytd_credit?}]}`。只接受末级科目。不平衡也可以保存 |
+| GET | /api/books/periods | 从建账期间到最后凭证期间与当月中较晚者，升序 |
+| GET | /api/books/detail | 明细账：account_code, period_from, period_to, include_unposted |
+| GET | /api/books/general | 总账：参数同明细账，不带分录 |
 | GET | /api/audit | 操作日志 |
 | POST | /api/chat | `{message, session_id?, regenerate?}` → SSE。第一个事件是 `event: session`（`session_id`）。随后是 Hermes 的文字和 `hermes.tool.progress`。没有 session_id 就新建会话，标题取第一句话前 20 个字。客户端断开时，已生成的内容末尾记「（已停止）」 |
 | GET | /api/chats | 会话列表，按 updated_at 倒序 |
@@ -59,8 +64,9 @@
 3. 审核人不能是制单人；AI 身份不能审核、反审核、记账、结账。这些由后端拦截，前端也要隐藏或禁用对应按钮。
 4. `source = "ai"` 的凭证是 AI 草稿，界面必须显示“AI 草稿”标记。
 5. 已结账期间不能新增、修改凭证。
-6. 余额默认只算已记账；界面可切换“含未记账”。
-7. AI 回答里出现凭证号（如 `记-0003`）时，前端把它渲染成可点击标签，点开右侧栏显示该凭证（`GET /api/vouchers/lookup`）。第一期按正则 `记-\d{4}` 识别。
+6. 凭证日期不能早于建账期间。已有凭证时不能改建账期间。有已记账凭证或已结账期间后期初余额和本年累计不能再改。期初不平衡时不能记账。损益类科目的期初必须为 0。
+7. 余额默认只算已记账；界面可切换“含未记账”。
+8. AI 回答里出现凭证号（如 `记-0003`）时，前端把它渲染成可点击标签，点开右侧栏显示该凭证（`GET /api/vouchers/lookup`）。第一期按正则 `记-\d{4}` 识别。
 
 ## 4. 界面约定
 

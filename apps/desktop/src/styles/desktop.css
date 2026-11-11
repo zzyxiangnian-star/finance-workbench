@@ -104,3 +104,22 @@ body { overflow: hidden; }
 .hdot.on { background: var(--ok); }
 .hdot.bad { background: var(--bad); }
 .recent .nav { padding-left: 36px; }
+
+.main:has(.books) { overflow: hidden; }
+.content:has(.books) { flex: 1 1 auto; min-height: 0; overflow: hidden; max-width: none; }
+.books { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 12px; }
+.tabs.sm { align-self: flex-start; }
+.tabs.sm button { height: 30px; font-size: 13px; }
+.bookbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.bookbar .picker { width: 280px; position: relative; }
+.bookscroll { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.bookscroll thead th { position: sticky; top: 0; background: var(--bg); z-index: 1; }
+.mutedrow td { color: var(--text2); }
+.sumrow td { font-weight: 600; border-top: 1px solid var(--line2); }
+.parentrow td { font-weight: 600; }
+.textlink { border: 0; background: transparent; color: var(--accent); cursor: pointer; font: inherit; padding: 0; }
+.textlink:hover { text-decoration: underline; }
+.rotl { transform: rotate(90deg); }
+.rotr { transform: rotate(-90deg); }
+.trialbar { display: flex; gap: 16px; align-items: center; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+.toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: var(--btn); color: var(--btn-text); border-radius: 10px; padding: 8px 14px; font-size: 13px; z-index: 40; }
